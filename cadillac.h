@@ -39,19 +39,27 @@ extern int no_schedule;                    // when this flag is one, tells the s
 /* ready queue. we put threads into this queue so they will be scheduled.
  */
 
-extern struct Queue *ready_queue;
+/* ready queue. we put threads into this queue so they will be scheduled.
+ */
+
+typedef struct {
+    int front, rear, size;
+    int* array;
+} Queue;
+
+extern Queue *ready_queue;
 
 /* returns 1 if the queue is full */
-int isFull(struct Queue* queue);
+int isFull(Queue *queue);
 
 /* returns 0 if the queue is empty */
-int isEmpty(struct Queue* queue);
+int isEmpty(Queue *queue);
 
 // add a tid to the queue.
-void enqueue_tid(struct Queue* queue, int tid);
+void enqueue_tid( Queue *queue, int tid);
 
 // remove an tid from queue.
-int dequeue_tid(struct Queue* queue);
+int dequeue_tid( Queue *queue);
 
 /* starts a new thread in the calling process. 
  * the new thread starts execution by invoking start_routine(); 

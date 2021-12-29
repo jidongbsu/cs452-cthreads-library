@@ -7,14 +7,6 @@
 
 #define MAX_NUM_THREADS   64  /* we limit our maximum number of threads to be 64 */
 
-/* ready queue. we put threads into this queue so they will be scheduled.
- */
-
-struct Queue {
-    int front, rear, size;
-    int* array;
-};
-
 /* a round-robin scheduler, runs every time the timers goes off.
  */
 void schedule(int sig) {
