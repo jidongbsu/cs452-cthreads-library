@@ -11,12 +11,12 @@
 #define DEBUG 1
 
 typedef int cthread_t;
-/* current_thread_id changes in 4 situations:
+/* current_tid changes in 4 situations:
  * 1. schedule
  * 2. calling lock finds lock is held
  * 3. child exit - child wants to wake up parent (or let someone else run)
  * 4. parent join - because parent wants to wait */
-extern cthread_t current_thread_id;             // id of the current running thread
+extern cthread_t current_tid;             // id of the current running thread
 
 /* thread control block.
  */
@@ -39,36 +39,19 @@ extern int no_schedule;                    // when this flag is one, tells the s
 /* ready queue. we put threads into this queue so they will be scheduled.
  */
 
-extern cthread_t ready[MAX_NUM_THREADS];
-extern int ready_head, ready_tail;
+extern struct Queue *ready_queue;
 
-/* read a fresh thread id.
- */
-cthread_t read_fresh_tid();
+/* returns 1 if the queue is full */
+int isFull(struct Queue* queue);
 
-/* put back a thread id to be fresh.
- */
-void write_fresh_tid(cthread_t tid);
+/* returns 0 if the queue is empty */
+int isEmpty(struct Queue* queue);
 
-/* see if the fresh id queue is empty.
- */
-int is_fresh_queue_empty();
+// add a tid to the queue.
+void enqueue_tid(struct Queue* queue, int tid);
 
-/* read a ready thread id.
- */
-cthread_t read_ready_tid();
-
-/* write back a ready thread id.
- */
-void write_ready_tid(cthread_t tid);
-
-/* see if the ready queue is empty.
- */
-int is_ready_empty();
-
-/* get ready queue size.
- */
-int ready_size();
+// remove an tid from queue.
+int dequeue_tid(struct Queue* queue);
 
 /* starts a new thread in the calling process. 
  * the new thread starts execution by invoking start_routine(); 
