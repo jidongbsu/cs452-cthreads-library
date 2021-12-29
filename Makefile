@@ -6,7 +6,7 @@ LIB2OBJS= cadillac.o
 
 all: libs
 
-libs: libcthreads-p2.a #libcthreads-p2.a #libcthreads-p1.so libcthreads-p2.so
+libs: libcthreads-p2.a #libcthreads-p1.a #libcthreads-p1.so libcthreads-p2.so
 	make install
 
 #libcthreads-p1.so: cadillac-p1.o
