@@ -39,9 +39,6 @@ extern int no_schedule;                    // when this flag is one, tells the s
 /* ready queue. we put threads into this queue so they will be scheduled.
  */
 
-/* ready queue. we put threads into this queue so they will be scheduled.
- */
-
 typedef struct {
     int front, rear, size;
     int* array;
