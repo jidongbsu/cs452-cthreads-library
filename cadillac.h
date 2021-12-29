@@ -46,11 +46,14 @@ typedef struct {
 
 extern Queue *ready_queue;
 
+/* returns size of the queue */
+int queue_size(Queue *queue);
+
 /* returns 1 if the queue is full */
-int isFull(Queue *queue);
+int queue_full(Queue *queue);
 
 /* returns 0 if the queue is empty */
-int isEmpty(Queue *queue);
+int queue_empty(Queue *queue);
 
 // add a tid to the queue.
 void enqueue_tid( Queue *queue, int tid);
