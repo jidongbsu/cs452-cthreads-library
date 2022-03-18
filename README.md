@@ -29,9 +29,24 @@ Parallel(2 levels) Sorting 100000000 elements took 9.78 seconds.
 
 In this assignment, we aim to implement a user level thread library which do not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
-## The Starter Code
+# The Starter Code
 
 To be added.
+
+# APIs
+
+I used the following APIs.
+
+## ucontext APIs
+
+```c
+int getcontext(ucontext_t *ucp);
+int setcontext(const ucontext_t *ucp);
+void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...);
+int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
+```
+
+**getcontext**() saves the current context in the structure pointed by *ucp*. **setcontext**() restores to the previously saved context - the one pointed by *ucp*. **makecontext**() modifies a context (pointed by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
 
 # References
 
@@ -39,7 +54,7 @@ To be added.
 
 # Submission
 
-Due: 23:59pm, Feburary 24th, 2022. Late submission will not be accepted/graded.
+Due: 23:59pm, April 14th, 2022. Late submission will not be accepted/graded.
 
 # Grading Rubric (Undergraduate and Graduate)
 Grade: /100
