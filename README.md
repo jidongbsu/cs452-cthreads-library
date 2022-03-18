@@ -29,6 +29,28 @@ Parallel(2 levels) Sorting 100000000 elements took 9.78 seconds.
 
 In this assignment, we aim to implement a user level thread library which do not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
+## requirements
+
+You are required to implement the following functions:
+
+```c
+int cthread_create(cthread_t *thread, const cthread_attr_t *attr, void *(*start_routine) (void *), void *arg);
+```
+
+This function creates a thread.
+
+```c
+void cthread_exit(void *retval);
+```
+
+This function exits the current thread.
+
+```c
+int cthread_join(cthread_t thread, void **retval);
+```
+
+This function let current thread wait for the exit of another thread.
+
 # The Starter Code
 
 To be added.
