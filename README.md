@@ -23,9 +23,7 @@ The test-and-set example (figure 28.3) described in this chapter is directly rel
 - [CPU Scheduling](https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf).
 This chapter has more explanation about the round robin scheduling policy, as well as the concept of time slicing.
 
-## Specification
-
-### user level thread library vs kernel level thread library
+## Background: user level thread library vs kernel level thread library
 
 In previous projects we used pthreads library, which allows us to run multiple threads concurrently. pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a seperate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple theads of the same process.
 
@@ -50,11 +48,11 @@ Parallel(2 levels) Sorting 100000000 elements took 8.50 seconds.
 
 In this assignment, we aim to implement a user level thread library which do not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
-### requirements
+## Specification
 
 You are required to implement the following functions:
 
-#### part 1
+### part 1
 
 ```c
 int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg);
@@ -86,7 +84,7 @@ static void schedule(int sig);
 
 This function implements the round robin scheduling.
 
-#### part 2
+### part 2
 
 ```c
 int cthread_mutex_init(cthread_mutex_t *mutex);
