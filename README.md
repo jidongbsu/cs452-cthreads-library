@@ -105,6 +105,8 @@ The starter code look like this.
 cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  Makefile  README.md  README.template
 ```
 
+You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
+
 # Predefined Data Structures and Global Variables
 
 # Provided Helper Functions
@@ -165,7 +167,7 @@ Once *setitimer*() succeeds, a timer interrupt will trigger every 50 millisecond
 
 ## signal handling APIs
 
-TO setup the signal handler, the following APIs are useful.
+To setup the signal handler, the following APIs are useful.
 
 ```c
 int sigemptyset(sigset_t *set);
