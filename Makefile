@@ -1,32 +1,32 @@
 CC=gcc
-CFLAGS=-Wall -MMD -g -O0 #-fPIC
+AR = ar
+CFLAGS=-Wall -MMD -g -O0 -fPIC -Wpointer-arith -std=gnu89 -MP
 
-#LIB1OBJS= cadillac-p1.o 
-LIB2OBJS= cadillac.o 
+LIBOBJS = cthreads.a
 
-all: libs
+OBJS =  cthreads-test1 cthreads-test2 cthreads-test3\
+	cthreads-test4 cthreads-test5\
 
-libs: libcthreads-p2.a #libcthreads-p1.a #libcthreads-p1.so libcthreads-p2.so
-	make install
+build = \
+	@if [ -z "$V" ]; then \
+		echo '  [$1]    $@'; \
+		$2; \
+	else \
+		echo '$2'; \
+		$2; \
+	fi
 
-#libcthreads-p1.so: cadillac-p1.o
-#	$(LD) -shared -o $@  cadillac-p1.o
+% : %.c $(LIBOBJS)
+	$(call build,LINK,$(CC) $(CFLAGS) $< $(LIBOBJS) -o $@)
 
-#libcthreads-p1.a: $(LIB1OBJS)
-#	$(AR)  rcv $@ $(LIB1OBJS)
-#	ranlib $@
+%.o : %.c
+	$(call build,CC,$(CC) $(CFLAGS) -c $< -o $@)
 
-#libcthreads-p2.so: $(LIBOBJS)
-#	$(LD) -shared -o $@  $(LIBOBJS)
+%.a : %.o
+	$(call build,AR,$(AR) rcs $@ $^)
 
-libcthreads-p2.a: $(LIB2OBJS)
-	$(AR)  rcv $@ $(LIB2OBJS)
-	ranlib $@
-
-install:
-#	install --mode=444 -C libcthreads-p1.a ./lib
-	install --mode=444 -C libcthreads-p2.a ./lib
+all: $(LIBOBJS) $(OBJS)
 
 clean:
 	rm -rf *.o a.out *.so *.a *.d
-	rm -f ./lib/libcthreads-p2.a
+	rm -f *.o *.d $(OBJS) $(LIBOBJS)
