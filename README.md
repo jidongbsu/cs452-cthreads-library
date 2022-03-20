@@ -23,7 +23,9 @@ The test-and-set example (figure 28.3) described in this chapter is directly rel
 - [CPU Scheduling](https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf).
 This chapter has more explanation about the round robin scheduling policy, as well as the concept of time slicing.
 
-## Background: user level thread library vs kernel level thread library
+## Background
+
+### user-level thread library vs kernel-level thread library
 
 In previous projects we used pthreads library, which allows us to run multiple threads concurrently. pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a seperate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple theads of the same process.
 
@@ -107,7 +109,62 @@ You will be completing the cthreads.c file. You are not allowed to modify the ct
 
 ## Predefined Data Structures and Global Variables
 
+### data structure for thread control block
+
+A global struct data structure is defined in cthreads.h:
+
+```c
+typedef struct {
+        int exited;     // is this thread exited?
+        int waiting;    // who are you (as a parent) waiting for. your waiting would be -1 if you're not waiting for anyone.
+        cthread_t parent;       // parent thread id
+        ucontext_t uc;  // user thread context
+        char stack[STACK_SIZE]; // each thread has its own private stack
+} thread_control_block;
+```
+
+A global array which contains 64 elements is defined to represent all the 64 thread control blocks.
+
+```c
+static thread_control_block tcbs[MAX_NUM_THREADS];
+```
+
+### data structures to track active thread IDs
+
+A global queue named *ready_queue* is defined as well as initialized like this:
+
+```
+struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {-1}};
+```
+
+This queue stores thread IDs for all ready threads. Note we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this queue.
+
+### data structures for your locks
+
+We define *cthread_mutex_t* in cthreads.h.
+
+```c
+typedef struct {
+        unsigned int lock;
+} cthread_mutex_t;
+```
+
+It only has one field - *lock*. You can use it like this: when *lock* is 1, it means the lock is held; when *lock* is 0, it means the lock is available.
+
 ## Provided Helper Functions
+
+```c
+void cthread_enqueue(struct Queue* queue, int tid);
+int cthread_dequeue(struct Queue* queue);
+```
+
+As their names suggest, these two functions allow you to enqueue a tid to the ready queue and dequeue a tid from the ready queue, respectively. Keep in mind when using *cthread_dequeue*(), it may return an invalid tid to you - when the queue is empty and you still attempt to dequeue - that may suggest that you have a bug in your code.
+
+```c
+static inline uint xchg(volatile unsigned int *old_ptr, unsigned int new);
+```
+
+This helper function provides atomic test-and-set functionality for you. Read the chapter [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf) to see why you need this and how you can use it when implementing your locks.
 
 ## APIs
 
