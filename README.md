@@ -2,30 +2,30 @@
 
 In this assignment, we will write a user level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions fail to compile or run on onyx, will not be graded.
 
-# Learning Objectives
+## Learning Objectives
 
 - Gaining a deep understanding of user-level thread libraries.
 - Implementing a round robin scheduler.
 - Practicing on managing a queue data structure.
 - Creating a large piece of system software in stages.
 
-# Book References
+## Book References
 
-- [Concurrency and Threads](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-intro.pdf)
+- [Concurrency and Threads](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-intro.pdf).
 This chapter explains how multiple threads programs look different from single thread programs.
 
-- [Threads API](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-api.pdf)
+- [Threads API](http://pages.cs.wisc.edu/~remzi/OSTEP/threads-api.pdf).
 This chapter describes the APIs provided by the pthread library, your cthreads library will provide very similar APIs, with some slight differences.
 
-- [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf)
+- [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf).
 The test-and-set example (figure 28.3) described in this chapter is directly related to this assignment and you should use it.
 
-- [CPU Scheduling](https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf)
+- [CPU Scheduling](https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf).
 This chapter has more explanation about the round robin scheduling policy, as well as the concept of time slicing.
 
-# Specification
+## Specification
 
-## user level thread library vs kernel level thread library
+### user level thread library vs kernel level thread library
 
 In previous projects we used pthreads library, which allows us to run multiple threads concurrently. pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a seperate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple theads of the same process.
 
@@ -50,11 +50,11 @@ Parallel(2 levels) Sorting 100000000 elements took 8.50 seconds.
 
 In this assignment, we aim to implement a user level thread library which do not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
-## requirements
+### requirements
 
 You are required to implement the following functions:
 
-### part 1
+#### part 1
 
 ```c
 int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg);
@@ -86,7 +86,7 @@ static void schedule(int sig);
 
 This function implements the round robin scheduling.
 
-### part 2
+#### part 2
 
 ```c
 int cthread_mutex_init(cthread_mutex_t *mutex);
@@ -96,7 +96,7 @@ int cthread_mutex_unlock(cthread_mutex_t *mutex);
 
 The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
 
-# The Starter Code
+## The Starter Code
 
 The starter code look like this.
 
@@ -107,15 +107,15 @@ cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  ct
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
 
-# Predefined Data Structures and Global Variables
+## Predefined Data Structures and Global Variables
 
-# Provided Helper Functions
+## Provided Helper Functions
 
-# APIs
+## APIs
 
 I used the following APIs.
 
-## ucontext APIs
+### ucontext APIs
 
 ```c
 int getcontext(ucontext_t *ucp);
@@ -126,7 +126,7 @@ int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 
 **getcontext**() saves the current context in the structure pointed by *ucp*. **setcontext**() restores to the previously saved context - the one pointed by *ucp*. **makecontext**() modifies a context (pointed by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
 
-## timer APIs
+### timer APIs
 
 ```c
 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
@@ -165,7 +165,7 @@ Once *time_quantum* is initialized, you can pass its address as the second param
 
 Once *setitimer*() succeeds, a timer interrupt will trigger every 50 milliseconds. The man page of *setitimer*() says "at each expiration, a SIGPROF signal is generated". In this assignment, you should implement an signal handler to handle this signal. A signal handler is a function which will be called when the signal is generated - the OS will generate the signal, and you just need to tell the OS which function is your signal handler, and the OS will call that signal handler to handle this signal. Apparently, this signal handler is your *schedule*() function - you want make a scheduling decision every 50 milliseconds, because that is the foundation of the round robin scheduling.
 
-## signal handling APIs
+### signal handling APIs
 
 To setup the signal handler, the following APIs are useful.
 
@@ -201,7 +201,7 @@ Once it's initialized, you can install the signal handler like this:
 
 Once *sigaction*() succeeds, every 50 milliseconds, your *schedule*() will be called.
 
-## other APIs
+### other APIs
 
 Anytime in any of the functions you implement in this assignment, you are recommended to call *exit*() like this:
 
@@ -217,15 +217,15 @@ exit(EXIT_SUCCESS);
 
 Think about in which function you want to call this.
 
-# Submission
+## Submission
 
 Due: 23:59pm, April 14th, 2022. Late submission will not be accepted/graded.
 
-# Project Layout
+## Project Layout
 
 All files necessary for compilation and testing need to be submitted, this includes source code files, header files, and Makefile. The structure of the submission folder should be the same as what was given to you.
 
-# Grading Rubric (Undergraduate and Graduate)
+## Grading Rubric (Undergraduate and Graduate)
 Grade: /100
 
 - [ 80 pts] Functional Requirements:
