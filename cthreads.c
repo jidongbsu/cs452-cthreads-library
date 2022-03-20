@@ -101,7 +101,7 @@ struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, 
 
 /* a round-robin scheduler, runs every time the timers goes off.
  */
-void schedule(int sig) {
+void cthread_schedule(int sig) {
 }
 
 /* initialize this library */

@@ -81,7 +81,7 @@ int cthread_join(cthread_t thread, void **retval);
 This function let current thread wait for the exit of another thread. In this assignment, we do not intend to use the argument *retval*.
 
 ```c
-static void schedule(int sig);
+static void cthread_schedule(int sig);
 ```
 
 This function implements the round robin scheduling.
@@ -218,7 +218,7 @@ Once *time_quantum* is initialized, you can pass its address as the second param
     }
 ```
 
-Once *setitimer*() succeeds, a timer interrupt will trigger every 50 milliseconds. The man page of *setitimer*() says "at each expiration, a SIGPROF signal is generated". In this assignment, you should implement an signal handler to handle this signal. A signal handler is a function which will be called when the signal is generated - the OS will generate the signal, and you just need to tell the OS which function is your signal handler, and the OS will call that signal handler to handle this signal. Apparently, this signal handler is your *schedule*() function - you want make a scheduling decision every 50 milliseconds, because that is the foundation of the round robin scheduling.
+Once *setitimer*() succeeds, a timer interrupt will trigger every 50 milliseconds. The man page of *setitimer*() says "at each expiration, a SIGPROF signal is generated". In this assignment, you should implement an signal handler to handle this signal. A signal handler is a function which will be called when the signal is generated - the OS will generate the signal, and you just need to tell the OS which function is your signal handler, and the OS will call that signal handler to handle this signal. Apparently, this signal handler is your *cthread_schedule*() function - you want make a scheduling decision every 50 milliseconds, because that is the foundation of the round robin scheduling.
 
 ### signal handling APIs
 
@@ -239,7 +239,7 @@ struct sigaction scheduler;
 You can initialize this variable like this:
 
 ```c
-scheduler.sa_handler = schedule;
+scheduler.sa_handler = cthread_schedule;
 scheduler.sa_flags = SA_RESTART;
 sigemptyset(&scheduler.sa_mask);
 sigaddset(&scheduler.sa_mask, SIGPROF);
@@ -254,7 +254,7 @@ Once it's initialized, you can install the signal handler like this:
     }
 ```
 
-Once *sigaction*() succeeds, every 50 milliseconds, your *schedule*() will be called.
+Once *sigaction*() succeeds, every 50 milliseconds, your *cthread_schedule*() will be called.
 
 ### other APIs
 
@@ -284,8 +284,8 @@ All files necessary for compilation and testing need to be submitted, this inclu
 Grade: /100
 
 - [ 80 pts] Functional Requirements:
-  - [10 pts] thread schedule, join, exit works correctly - tested by cthreads-test1.
-  - [10 pts] thread schedule, join, exit works correctly - tested by cthreads-test2.
+  - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test1.
+  - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test2.
   - [20 pts] thread lock/unlock works correctly - tested by cthreads-test3.
   - [20 pts] thread lock/unlock works correctly - tested by cthreads-test4.
   - [20 pts] thread lock/unlock works correctly - tested by cthreads-test5.
