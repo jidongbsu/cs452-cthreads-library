@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a user level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions fail to compile or run on onyx, will not be graded.
+In this assignment, we will write a user level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions fail to compile or run on onyx will not be graded.
 
 ## Learning Objectives
 
@@ -27,7 +27,7 @@ This chapter has more explanation about the round robin scheduling policy, as we
 
 ### user-level thread library vs kernel-level thread library
 
-In previous projects we used pthreads library, which allows us to run multiple threads concurrently. pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a seperate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple theads of the same process.
+In previous projects we used the pthreads library, which allows us to run multiple threads concurrently. The pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a separate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple threads of the same process.
 
 ```console
 (base) [jidongxiao@onyx ~]$ ps -eLf | grep test-mergesort
@@ -48,7 +48,7 @@ Serial Sorting 100000000 elements took 26.80 seconds.
 Parallel(2 levels) Sorting 100000000 elements took 8.50 seconds.
 ```
 
-In this assignment, we aim to implement a user level thread library which do not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
+In this assignment, we aim to implement a user level thread library which does not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
 ## Specification
 
@@ -78,7 +78,7 @@ This function exits the current thread. In this assignment, we do not intend to 
 int cthread_join(cthread_t thread, void **retval);
 ```
 
-This function let current thread wait for the exit of another thread. In this assignment, we do not intend to use the argument *retval*.
+This function lets current thread wait for the exit of another thread. In this assignment, we do not intend to use the argument *retval*.
 
 ```c
 static void cthread_schedule(int sig);
@@ -98,7 +98,7 @@ The user of your library calls these 3 functions to initialize a lock, grab a lo
 
 ## The Starter Code
 
-The starter code look like this.
+The starter code looks like this.
 
 ```console
 (base) [jidongxiao@onyx cs452-cthreads-library]$ ls
@@ -106,6 +106,8 @@ cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  ct
 ```
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
+
+5 testing programs are provided in the starter code. They are cthreads-test[1-5].c. See their description in the [Testing](#testing) section.
 
 ## Predefined Data Structures and Global Variables
 
@@ -163,7 +165,7 @@ You can use this global variable to track if *cthread_init*() is called already 
 static cthread_t current_tid;
 ```
 
-You should initialize to the tid of the main thread. Anytime you a context switch is about to occur, we update this variable to store the tid of the thread that is chosen to run.
+You should initialize to the tid of the main thread. Anytime a context switch is about to occur, we update this variable to store the tid of the thread that is chosen to run.
 
 ```c
 /* a global variable, we increment this by one every time we create a thread */
@@ -203,10 +205,10 @@ int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 **getcontext**() saves the current context in the structure pointed by *ucp*. **setcontext**() restores to the previously saved context - the one pointed by *ucp*. **makecontext**() modifies a context (pointed by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
 
 - in *cthread_init*(), you may want to use **getcontext**() to save the context of the main thread into the address pointed to by *ucp*.
-- in *cthread_create*(), you may want to use **getcontext**() to save the context of the newly created thread into the address pointed to by *ucp*, and use **makecontext**() to setup the start routine of this newly creately thread.
+- in *cthread_create*(), you may want to use **getcontext**() to save the context of the newly created thread into the address pointed to by *ucp*, and use **makecontext**() to setup the start routine of this newly created thread.
 - in *cthread_join*(), you may want to use **swapcontext**() to save the context of the parent thread, and switch to the context of some other thread - not necessarily the child thread.
 - in *cthread_schedule*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
-- in *cthread_mutex_lock*(), you may want to use **swapcontext**() to save the context the current thread, and switch to the context of another thread.
+- in *cthread_mutex_lock*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
 - in *cthread_exit*(), you may want to use **setcontext**() to switch to the context of another thread. Question: why this time it is **setcontext**(), rather than **swapcontext**()?
 
 ### timer APIs
@@ -246,7 +248,7 @@ Once *time_quantum* is initialized, you can pass its address as the second param
     }
 ```
 
-Once *setitimer*() succeeds, a timer interrupt will trigger every 50 milliseconds. The man page of *setitimer*() says "at each expiration, a SIGPROF signal is generated". In this assignment, you should implement an signal handler to handle this signal. A signal handler is a function which will be called when the signal is generated - the OS will generate the signal, and you just need to tell the OS which function is your signal handler, and the OS will call that signal handler to handle this signal. Apparently, this signal handler is your *cthread_schedule*() function - you want make a scheduling decision every 50 milliseconds, because that is the foundation of the round robin scheduling.
+Once *setitimer*() succeeds, a timer interrupt will trigger every 50 milliseconds. The man page of *setitimer*() says "at each expiration, a SIGPROF signal is generated". In this assignment, you should implement a signal handler to handle this signal. A signal handler is a function which will be called when the signal is generated - the OS will generate the signal, and you just need to tell the OS which function is your signal handler, and the OS will call that signal handler to handle this signal. Apparently, this signal handler is your *cthread_schedule*() function - you want to make a scheduling decision every 50 milliseconds, because that is the foundation of the round robin scheduling.
 
 ### signal handling APIs
 
@@ -302,7 +304,7 @@ Think about in which function you want to call this.
 
 ## Testing 
 
-5 testing programs are provided. They are cthreads-test[1-5].c. Once you run make, you will generate the binary files of these testing programs.
+5 testing programs are provided in the starter code. They are cthreads-test[1-5].c. Once you run make, you will generate the binary files of these testing programs.
 
 - cthreads-test1 tests thread creation, join, exit; 
 - cthreads-test2 tests thread creation, join, exit, as well as thread schedule.
