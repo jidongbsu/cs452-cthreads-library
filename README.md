@@ -50,6 +50,19 @@ Parallel(2 levels) Sorting 100000000 elements took 8.50 seconds.
 
 In this assignment, we aim to implement a user level thread library which does not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
+## The Starter Code
+
+The starter code looks like this.
+
+```console
+(base) [jidongxiao@onyx cs452-cthreads-library]$ ls
+cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  Makefile  README.md  README.template
+```
+
+You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
+
+5 testing programs are provided in the starter code. They are cthreads-test[1-5].c. See their description in the [Testing](#testing) section.
+
 ## Specification
 
 You are required to implement the following functions:
@@ -95,19 +108,6 @@ int cthread_mutex_unlock(cthread_mutex_t *mutex);
 ```
 
 The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
-
-## The Starter Code
-
-The starter code looks like this.
-
-```console
-(base) [jidongxiao@onyx cs452-cthreads-library]$ ls
-cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  Makefile  README.md  README.template
-```
-
-You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
-
-5 testing programs are provided in the starter code. They are cthreads-test[1-5].c. See their description in the [Testing](#testing) section.
 
 ## Predefined Data Structures and Global Variables
 
