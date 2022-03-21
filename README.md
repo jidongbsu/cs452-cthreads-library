@@ -131,6 +131,8 @@ A global array which contains 64 elements is defined to represent all the 64 thr
 static thread_control_block tcbs[MAX_NUM_THREADS];
 ```
 
+Among all the fields in *thread_control_block*, *ucontext_t uc* is the field which enables you to switch the context from one thread to another thread. Read the [APIs](#apis) section for more details.
+
 ### data structures to track active thread IDs
 
 A global queue named *ready_queue* is defined as well as initialized like this:
@@ -220,12 +222,34 @@ int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg
 	...
 	/* add code here so that tcb will point to (the address of) the right tcbs[] element */
 	...
+	getcontext(&tcb->uc);
+	/* ss_sp stores the starting address of the stack, which in our case, is tcb->stack. */
+	tcb->uc.uc_stack.ss_sp = (void *) tcb->stack;
+	tcb->uc.uc_stack.ss_size = STACK_SIZE;
+	...
+	/* add code here to initialize other fields of tcb, such as waiting, exited, parent... */
+	...
 	makecontext(&tcb->uc, (void(*)(void))start_routine, 1, arg);
 	...
 }
 ```
 
 In the above, do no change the third argument of **makecontext**(), which is "1", which says this *start_routine*() has only 1 argument, which is *arg*.
+
+You do not need to call **makecontext**() in the main thread, and you do not need to setup any stack information for the main thread - it has its own stack by default. However, you still need to initialize its tcb, and call **getcontext**(), and you can do it like this: 
+
+```c
+static int cthread_init() {
+	...
+	thread_control_block *tcb;
+	...
+	/* add code here so that tcb will point to (the address of) the right tcbs[] element */
+	...
+	getcontext(&tcb->uc);
+	/* add code here to initialize other fields of tcb, such as waiting, exited, parent... */
+	...
+}
+```
 
 ### timer APIs
 
