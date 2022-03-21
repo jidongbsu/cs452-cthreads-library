@@ -55,14 +55,14 @@ struct Queue {
 };
 
 /* is queue full? 
- * functions not exported to outside shoudld be declared as static. */
+ * functions not exported to outside should be declared as static. */
 static int isFull(struct Queue* queue)
 {
     return (queue->size == MAX_NUM_THREADS);
 }
 
 /* is queue empty? 
- * functions not exported to outside shoudld be declared as static. */
+ * functions not exported to outside should be declared as static. */
 static int isEmpty(struct Queue* queue)
 {
     return (queue->size == 0);
@@ -104,12 +104,12 @@ struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, 
 /* a round-robin scheduler, runs every time the timers goes off.
  * the first time when this function is called and switches contexts,
  * it places the main thread into the queue, and pick one child thread to run.
- * functions not exported to outside shoudld be declared as static.
+ * functions not exported to outside should be declared as static.
  */
 static void cthread_schedule(int sig) {
 }
 
-/* initialize this library - functions not exported to outside shoudld be declared as static. */
+/* initialize this library - functions not exported to outside should be declared as static. */
 static int cthread_init() {
 }
 
