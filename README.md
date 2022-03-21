@@ -151,6 +151,27 @@ typedef struct {
 
 It only has one field - *lock*. You can use it like this: when *lock* is 1, it means the lock is held; when *lock* is 0, it means the lock is available.
 
+### global variables
+
+```c
+int initialized = FALSE;
+```
+
+You can use this global variable to track if *cthread_init*() is called already or not. *cthread_init*() should only be called once, for each application.
+
+```c
+static cthread_t current_tid;
+```
+
+You should initialize to the tid of the main thread. Anytime you a context switch is about to occur, we update this variable to store the tid of the thread that is chosen to run.
+
+```c
+/* a global variable, we increment this by one every time we create a thread */
+cthread_t tid_idx = 0;
+```
+
+As the comment suggests, we use this global variable to track how many threads have been created. In this assignment, you never need to decrement this variable.
+
 ## Provided Helper Functions
 
 ```c
@@ -279,6 +300,102 @@ exit(EXIT_SUCCESS);
 
 Think about in which function you want to call this.
 
+## Testing 
+
+5 testing programs are provided. They are cthreads-test[1-5].c. Once you run make, you will generate the binary files of these testing programs.
+
+- cthreads-test1 tests thread creation, join, exit; 
+- cthreads-test2 tests thread creation, join, exit, as well as thread schedule.
+- cthreads-test[3-5] tests thread creation, join, exit, schedule, as well as locks; 
+
+## Expected Results
+
+- When running cthreads-test1, you are expected to get:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test1
+main: begin
+A
+B
+main: end
+```
+
+- When running cthreads-test2, you are expected to get:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test2 4 100
+initial balance = 0.000000
+final balance = 400.000000
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test2 4 100000000
+initial balance = 0.000000
+final balance = 177966376.000000
+```
+
+In the above, when run "cthreads-test2 4 100" you must get 400 as the result, when run "./cthreads-test2 4 100000000", your result must be lower than 400000000, but does not have to the same number as the one showed above.
+
+- When running cthreads-test3, you are expected to get the exactly same result as following:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test3 4 100
+initial balance = 0.000000
+final balance = 400.000000
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test3 4 100000000
+initial balance = 0.000000
+final balance = 400000000.000000
+```
+
+- When running cthreads-test4, you are expected to get a result similar to this:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test4
+thread 1 exiting
+thread 2 exiting
+thread 5 exiting
+thread 6 exiting
+thread 8 exiting
+thread 9 exiting
+thread 12 exiting
+thread 13 exiting
+thread 15 exiting
+thread 16 exiting
+thread 19 exiting
+thread 20 exiting
+thread 22 exiting
+thread 23 exiting
+thread 26 exiting
+thread 27 exiting
+thread 29 exiting
+thread 30 exiting
+thread 32 exiting
+thread 3 exiting
+thread 4 exiting
+thread 7 exiting
+thread 10 exiting
+thread 14 exiting
+thread 17 exiting
+thread 18 exiting
+thread 21 exiting
+thread 24 exiting
+thread 28 exiting
+thread 31 exiting
+thread 11 exiting
+thread 25 exiting
+main: exiting
+```
+
+In the above, the order of which thread exits first, which thread exits next, does not matter. But all 32 threads need to exit before the main thread exits.
+
+- When running cthreads-test3, you are expected to get the exactly same result as following:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test5
+main: output "foobar" 10 times in a row:
+foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
+main: exiting
+```
+
+As you can see, *cthread-test5* is just a solution to Leetcode problem No.1115 - print FooBar alternately.
+
 ## Submission
 
 Due: 23:59pm, April 14th, 2022. Late submission will not be accepted/graded.
@@ -291,11 +408,11 @@ All files necessary for compilation and testing need to be submitted, this inclu
 Grade: /100
 
 - [ 80 pts] Functional Requirements:
-  - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test1.
+  - [10 pts] thread create, join, exit works correctly - tested by cthreads-test1.
   - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test2.
-  - [20 pts] thread lock/unlock works correctly - tested by cthreads-test3.
-  - [20 pts] thread lock/unlock works correctly - tested by cthreads-test4.
-  - [20 pts] thread lock/unlock works correctly - tested by cthreads-test5.
+  - [20 pts] thread schedule, lock/unlock works correctly - tested by cthreads-test3.
+  - [20 pts] thread schedule, lock/unlock works correctly - tested by cthreads-test4.
+  - [20 pts] thread schedule, lock/unlock works correctly - tested by cthreads-test5.
 
 - [10 pts] Compiler warnings:
   - Each compiler warning will result in a 3 point deduction.
