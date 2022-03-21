@@ -63,7 +63,7 @@ int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg
 This function creates a new thread. The new thread starts execution by invoking *start_routine*(); *arg* is passed as the sole argument of *start_routine*(). Before returning, a successful call to *cthread_create*() stores the ID of the new thread in the address pointed to by thread; the user who uses your library is responsible for allocating memory for the address pointed to by *thread*. It is also the user's responsibility to define the *start_routine*() and pass the correct *arg*.
 
 ```c
-int cthread_init();
+static int cthread_init();
 ```
 
 This function is not provided for the user, but you should call it in your *cthread_create*() to initialize your library.
@@ -170,7 +170,7 @@ This helper function provides atomic test-and-set functionality for you. Read th
 
 I used the following APIs.
 
-### ucontext APIs
+### user context (aka. ucontext) APIs
 
 ```c
 int getcontext(ucontext_t *ucp);
@@ -180,6 +180,13 @@ int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 ```
 
 **getcontext**() saves the current context in the structure pointed by *ucp*. **setcontext**() restores to the previously saved context - the one pointed by *ucp*. **makecontext**() modifies a context (pointed by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
+
+- in *cthread_init*(), you may want to use **getcontext**() to save the context of the main thread into the address pointed to by *ucp*.
+- in *cthread_create*(), you may want to use **getcontext**() to save the context of the newly created thread into the address pointed to by *ucp*, and use **makecontext**() to setup the start routine of this newly creately thread.
+- in *cthread_join*(), you may want to use **swapcontext**() to save the context of the parent thread, and switch to the context of some other thread - not necessarily the child thread.
+- in *cthread_schedule*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
+- in *cthread_mutex_lock*(), you may want to use **swapcontext**() to save the context the current thread, and switch to the context of another thread.
+- in *cthread_exit*(), you may want to use **setcontext**() to switch to the context of another thread. Question: why this time it is **setcontext**(), rather than **swapcontext**()?
 
 ### timer APIs
 

@@ -60,7 +60,7 @@ int isFull(struct Queue* queue)
     return (queue->size == MAX_NUM_THREADS);
 }
 
-/* is queue empty */
+/* is queue empty? */
 int isEmpty(struct Queue* queue)
 {
     return (queue->size == 0);
@@ -92,7 +92,7 @@ int cthread_dequeue(struct Queue* queue)
     return tid;
 }
 
-/* ready queue. we put threads into this queue so they will be scheduled. a fancy way to initialize this struct.
+/* ready queue. we put thread IDs into this queue so they will be scheduled. a fancy way to initialize this struct.
  */
 
 struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {-1}};
@@ -100,26 +100,41 @@ struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, 
 /* Part 1: threads */
 
 /* a round-robin scheduler, runs every time the timers goes off.
+ * the first time when this function is called and switches contexts,
+ * it places the main thread into the queue, and pick one child thread to run.
+ * functions not exported to outside shoudld be declared as static.
  */
-void cthread_schedule(int sig) {
+static void cthread_schedule(int sig) {
 }
 
-/* initialize this library */
-int cthread_init() {
+/* initialize this library - functions not exported to outside shoudld be declared as static. */
+static int cthread_init() {
 }
 
-/* create a new thread, starting with execution of start_routine,
- * getting passed arg. The new id is stored in *thread.
+/* starts a new thread in the calling process.
+ * the new thread starts execution by invoking start_routine();
+ * arg is passed as the sole argument of start_routine().
+ * before returning, a successful call to cthread_create() stores
+ * the ID of the new thread in the buffer pointed to by thread;
  */
 int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg) {
 
-/* terminate calling thread.
+/* terminates the calling thread and returns a value via retval that
+ * (if the thread is joinable) is available to another thread
+ * in the same process that calls cthread_join().
+ * in this assignment, we do not use retval.
+ * note: we always assume child calls cthread_exit() to exit.
+ * but the main thread never calls this function.
  */
 void cthread_exit(void *retval) {
 }
 
-/* make calling thread wait for termination of some other thread.
+/* waits for the thread specified by thread to terminate.
+ * if that thread has already terminated, then cthread_join() returns immediately.
  * only threads who have kids are supposed to call join.
+ * on success, cthread_join() returns 0; on error, we print an error message and exit.
+ * in this assignment, we do not use retval;
+ * plus, in our applications, right now, we do not use the return value of cthread_join().
  */
 int cthread_join(cthread_t thread, void **retval) {
 	return 0;
@@ -127,8 +142,7 @@ int cthread_join(cthread_t thread, void **retval) {
 
 /* Part 2: locks */
 
-/* initialize a mutex.
- */
+/* initialize a mutex. */
 int cthread_mutex_init(cthread_mutex_t *mutex) {
 	return 0;
 }
@@ -144,8 +158,7 @@ static inline uint xchg(volatile unsigned int *old_ptr, unsigned int new) {
 	return old;
 }
 
-/* lock a mutex.
- */
+/* lock a mutex, returns 0 if successful. */
 int cthread_mutex_lock(cthread_mutex_t *mutex) {
 
 	//while (xchg(&(mutex->lock), 1) == 1)
@@ -154,8 +167,7 @@ int cthread_mutex_lock(cthread_mutex_t *mutex) {
 	return 0;
 }
 
-/* unlock a mutex.
- */
+/* unlock a mutex, returns 0 if successful. */
 int cthread_mutex_unlock(cthread_mutex_t *mutex) {
 	return 0;
 }
