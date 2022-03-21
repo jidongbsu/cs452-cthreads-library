@@ -211,6 +211,22 @@ int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 - in *cthread_mutex_lock*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
 - in *cthread_exit*(), you may want to use **setcontext**() to switch to the context of another thread. Question: why this time it is **setcontext**(), rather than **swapcontext**()?
 
+Among these functions, **makecontext**() requires you to pass a function pointer. You can do it like this:
+
+```c
+int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg) {
+	...
+	thread_control_block *tcb;
+	...
+	/* add code here so that tcb will point to (the address of) the right tcbs[] element */
+	...
+	makecontext(&tcb->uc, (void(*)(void))start_routine, 1, arg);
+	...
+}
+```
+
+Do no change the third argument **makecontext**(), which is "1", which says this *start_routine*() has only 1 argument, which is *arg*.
+
 ### timer APIs
 
 ```c
