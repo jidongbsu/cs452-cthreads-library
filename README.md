@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a user level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions fail to compile or run on onyx will not be graded.
+In this assignment, we will write a user level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions that fail to compile or run on onyx will not be graded.
 
 ## Learning Objectives
 
@@ -202,7 +202,7 @@ void makecontext(ucontext_t *ucp, void (*func)(), int argc, ...);
 int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 ```
 
-**getcontext**() saves the current context in the structure pointed by *ucp*. **setcontext**() restores to the previously saved context - the one pointed by *ucp*. **makecontext**() modifies a context (pointed by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
+**getcontext**() saves the current context in the structure pointed to by *ucp*. **setcontext**() restores to the previously saved context - the one pointed to by *ucp*. **makecontext**() modifies a context (pointed to by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
 
 - in *cthread_init*(), you may want to use **getcontext**() to save the context of the main thread into the address pointed to by *ucp*.
 - in *cthread_create*(), you may want to use **getcontext**() to save the context of the newly created thread into the address pointed to by *ucp*, and use **makecontext**() to setup the start routine of this newly created thread.
