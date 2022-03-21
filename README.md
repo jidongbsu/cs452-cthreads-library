@@ -225,7 +225,7 @@ int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg
 }
 ```
 
-Do no change the third argument **makecontext**(), which is "1", which says this *start_routine*() has only 1 argument, which is *arg*.
+In the above, do no change the third argument of **makecontext**(), which is "1", which says this *start_routine*() has only 1 argument, which is *arg*.
 
 ### timer APIs
 
