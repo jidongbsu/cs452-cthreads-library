@@ -54,14 +54,16 @@ struct Queue {
     int tids[MAX_NUM_THREADS];
 };
 
-/* is queue full? */
-int isFull(struct Queue* queue)
+/* is queue full? 
+ * functions not exported to outside shoudld be declared as static. */
+static int isFull(struct Queue* queue)
 {
     return (queue->size == MAX_NUM_THREADS);
 }
 
-/* is queue empty? */
-int isEmpty(struct Queue* queue)
+/* is queue empty? 
+ * functions not exported to outside shoudld be declared as static. */
+static int isEmpty(struct Queue* queue)
 {
     return (queue->size == 0);
 }
