@@ -8,8 +8,8 @@ In this assignment, we will write a user level thread library called cadillac-th
 - Gaining a deep understanding of user-level thread libraries.
 - Understanding how to implement a round robin scheduler.
 - Practicing on managing queue data structures.
-- Understanding how to implement a lock.
-- Understanding how to implement a semaphore.
+- Learning how to implement a lock.
+- Learning how to implement a semaphore.
 
 ## Book References
 
@@ -224,7 +224,7 @@ void cthread_enqueue(struct Queue* queue, int tid);
 int cthread_dequeue(struct Queue* queue);
 ```
 
-As their names suggest, these two functions allow you to enqueue a tid to the ready queue and dequeue a tid from the ready queue, respectively. Keep in mind when using *cthread_dequeue*(), it may return an invalid tid to you - when the queue is empty and you still attempt to dequeue - that may suggest that you have a bug in your code.
+As their names suggest, these two functions allow you to enqueue a tid to the tail of the *queue* and dequeue a tid from the head of the *queue*, respectively. You can use these two functions to manipulate the global variable *ready_queue*, and you can also use these two functions to manipulate your semaphores' waiting queue. Keep in mind when using *cthread_dequeue*(), it may return an invalid tid to you - when the queue is empty and you still attempt to dequeue - that may suggest that you have a bug in your code.
 
 ```c
 static int isEmpty(struct Queue* queue);
