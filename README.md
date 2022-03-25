@@ -306,7 +306,7 @@ static int cthread_init() {
 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
 ```
 
-Read the man page of this function to see how to use it. You will need to use this function so as to set a timer, which goes off every 50 milliseconds, which is why the starter code has this line (in cthreads.h):
+You will need to use this function so as to set a timer, which goes off every 50 milliseconds, which is why the starter code has this line (in cthreads.h):
 
 ```c
 #define QUANTUM  50000
