@@ -23,7 +23,7 @@ This chapter describes the APIs provided by the pthread library, your cthreads l
 The test-and-set example (figure 28.3) described in this chapter is directly related to this assignment and you should use it.
 
 - [Semaphores](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-sema.pdf).
-This chapter explains what semaphores are, how we can can use semaphores in concurrent programs, and how semaphores can be implemented.
+This chapter explains what semaphores are, how we can use semaphores in concurrent programs, and how semaphores can be implemented.
 
 - [CPU Scheduling](https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf).
 This chapter has more explanation about the round robin scheduling policy, as well as the concept of time slicing.
@@ -61,7 +61,7 @@ The starter code looks like this.
 
 ```console
 (base) [jidongxiao@onyx cs452-cthreads-library]$ ls
-cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  cthread-test6.c  cthread-test7.c  Makefile  README.md  README.template
+cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  cthreads-test6.c  cthreads-test7.c  Makefile  README.md  README.template
 ```
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
@@ -104,7 +104,7 @@ static void cthread_schedule(int sig);
 
 This function implements the round robin scheduling. In this assignment, we do not intend to use the argument *sig*.
 
-**Warning**: Move on to part 2 only if part 1 is implemented and you have passed *cthread-test[1-2]*.
+**Warning**: Move on to part 2 only if part 1 is implemented and you have passed *cthreads-test[1-2]*.
 
 ### part 2
 
@@ -116,7 +116,7 @@ int cthread_mutex_unlock(cthread_mutex_t *mutex);
 
 The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
 
-**Warning**: Move on to part 3 only if part 2 is implemented and you have passed *cthread-test[3-5]*.
+**Warning**: Move on to part 3 only if part 2 is implemented and you have passed *cthreads-test[3-5]*.
 
 ### part 3
 
@@ -493,7 +493,7 @@ main: output "foobar" 10 times in a row:
 foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 main: exiting
 ```
-As you can see, *cthread-test5* and *cthread-test6* produce the same result. They are just two different solutions to Leetcode problem No.1115 - print FooBar alternately. *cthread-test5* uses locks. *cthread-test6* uses semaphores.
+As you can see, *cthreads-test5* and *cthreads-test6* produce the same result. They are just two different solutions to Leetcode problem No.1115 - print FooBar alternately. *cthreads-test5* uses locks. *cthreads-test6* uses semaphores.
 
 - When running cthreads-test6, you are expected to get the exactly same result as following:
 
