@@ -7,7 +7,7 @@ In this assignment, we will write a user level thread library called cadillac-th
 - Creating a large piece of system software in stages.
 - Gaining a deep understanding of user-level thread libraries.
 - Understanding how to implement a round robin scheduler.
-- Practicing on managing a queue data structure.
+- Practicing on managing queue data structures.
 - Understanding how to implement a lock.
 - Understanding how to implement a semaphore.
 
@@ -21,6 +21,9 @@ This chapter describes the APIs provided by the pthread library, your cthreads l
 
 - [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf).
 The test-and-set example (figure 28.3) described in this chapter is directly related to this assignment and you should use it.
+
+- [Semaphores](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-sema.pdf).
+This chapter explains what semaphores are, how we can can use semaphores in concurrent programs, and how semaphores can be implemented.
 
 - [CPU Scheduling](https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf).
 This chapter has more explanation about the round robin scheduling policy, as well as the concept of time slicing.
@@ -58,7 +61,7 @@ The starter code looks like this.
 
 ```console
 (base) [jidongxiao@onyx cs452-cthreads-library]$ ls
-cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  Makefile  README.md  README.template
+cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  cthread-test6.c  cthread-test7.c  Makefile  README.md  README.template
 ```
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
@@ -93,13 +96,15 @@ This function exits the current thread. In this assignment, we do not intend to 
 int cthread_join(cthread_t thread, void **retval);
 ```
 
-This function lets current thread wait for the exit of another thread. In this assignment, we do not intend to use the argument *retval*.
+This function lets the current thread wait for the exit of another thread. In this assignment, we do not intend to use the argument *retval*.
 
 ```c
 static void cthread_schedule(int sig);
 ```
 
-This function implements the round robin scheduling.
+This function implements the round robin scheduling. In this assignment, we do not intend to use the argument *sig*.
+
+**Warning**: Move on to part 2 only if part 1 is implemented and you have passed *cthread-test[1-2]*.
 
 ### part 2
 
@@ -110,6 +115,8 @@ int cthread_mutex_unlock(cthread_mutex_t *mutex);
 ```
 
 The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
+
+**Warning**: Move on to part 3 only if part 2 is implemented and you have passed *cthread-test[3-5]*.
 
 ### part 3
 
@@ -220,10 +227,17 @@ int cthread_dequeue(struct Queue* queue);
 As their names suggest, these two functions allow you to enqueue a tid to the ready queue and dequeue a tid from the ready queue, respectively. Keep in mind when using *cthread_dequeue*(), it may return an invalid tid to you - when the queue is empty and you still attempt to dequeue - that may suggest that you have a bug in your code.
 
 ```c
+static int isEmpty(struct Queue* queue);
+static int isFull(struct Queue* queue);
+```
+
+These two functions tell you if the queue is empty, or if the queue is full.
+
+```c
 static inline uint xchg(volatile unsigned int *old_ptr, unsigned int new);
 ```
 
-This helper function provides atomic test-and-set functionality for you. Read the chapter [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf) to see why you need this and how you can use it when implementing your locks.
+This helper function provides atomic test-and-set functionality for you. Read the chapter [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf) to see why you need this and how you can use it when implementing your locks. You may want to use this function in your *cthread_mutex_lock*() and also in your *cthread_sem_wait*().
 
 ## APIs
 
@@ -245,6 +259,7 @@ int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 - in *cthread_join*(), you may want to use **swapcontext**() to save the context of the parent thread, and switch to the context of some other thread - not necessarily the child thread.
 - in *cthread_schedule*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
 - in *cthread_mutex_lock*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
+- in *cthread_sem_wait*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
 - in *cthread_exit*(), you may want to use **setcontext**() to switch to the context of another thread. Question: why this time it is **setcontext**(), rather than **swapcontext**()?
 
 Among these functions, **makecontext**() requires you to pass a function pointer. You can do it like this:
@@ -504,9 +519,9 @@ Grade: /100
 - [ 80 pts] Functional Requirements:
   - [10 pts] thread create, join, exit works correctly - tested by cthreads-test1.
   - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test2.
-  - [20 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test3.
-  - [10 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test4.
-  - [10 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test5.
+  - [10 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test3.
+  - [15 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test4.
+  - [15 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test5.
   - [10 pts] thread schedule, lock/unlock, and semaphore work correctly - tested by cthreads-test6.
   - [10 pts] thread schedule, lock/unlock, and semaphore work correctly - tested by cthreads-test7.
 
