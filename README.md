@@ -495,7 +495,7 @@ main: exiting
 ```
 As you can see, *cthreads-test5* and *cthreads-test6* produce the same result. They are just two different solutions to Leetcode problem No.1115 - print FooBar alternately. *cthreads-test5* uses locks. *cthreads-test6* uses semaphores.
 
-- When running cthreads-test7, you are expected to get the exactly same result as following:
+- When running cthreads-test7, you are expected to get results like this:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test7
@@ -503,7 +503,7 @@ main: building H2O:
 HHOHHOHHOHHOHHO
 main: exiting
 ```
-In theory, your result might looks different than the above result. Refer to Leetcode problem No.1117 - Building H2O, and see what other results are also acceptable.
+In theory, your result might look different than the above result. Refer to [Leetcode problem No.1117 - Building H2O](https://leetcode.com/problems/building-h2o/), and see what other results are also acceptable.
 
 ## Submission
 
