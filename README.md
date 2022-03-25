@@ -493,7 +493,7 @@ main: output "foobar" 10 times in a row:
 foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 main: exiting
 ```
-As you can see, *cthreads-test5* and *cthreads-test6* produce the same result. They are just two different solutions to Leetcode problem No.1115 - print FooBar alternately. *cthreads-test5* uses locks. *cthreads-test6* uses semaphores.
+As you can see, *cthreads-test5* and *cthreads-test6* produce the same result. They are just two different solutions to [Leetcode problem No.1115 - Print FooBar Alternately](https://leetcode.com/problems/print-foobar-alternately/). *cthreads-test5* uses locks. *cthreads-test6* uses semaphores.
 
 - When running cthreads-test7, you are expected to get results like this:
 
