@@ -162,9 +162,7 @@ A global queue named *ready_queue* is defined as well as initialized like this:
 struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {[0 ... (MAX_NUM_THREADS-1)] = -1}};
 ```
 
-This queue stores thread IDs for all ready threads. Note we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this queue.
-
-The above approach to initialize a struct is known as using **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore. The queue itself is a *struct Queue*, which is defined as following in *cthread.h*:
+This queue stores thread IDs for all ready threads. The queue itself is an instance of *struct Queue*, which is defined as following in *cthread.h*:
 
 ```c
 /* a structure to represent a queue */
@@ -176,7 +174,11 @@ struct Queue {
 };
 ```
 
-The array *tids[]* stores tids, for the *ready_queue*, the above initialization code shows all of its 64 elements in *tids*[] are initialized to -1.
+More specifically, the array *tids[]* stores tids. For the *ready_queue*, the above initialization code shows all of its 64 elements in *tids*[] are initialized to -1.
+
+Note that we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this *ready_queue*. Or, in the semaphore case, their IDs may be stored in a semaphore's waiting queue.
+
+The above approach to initialize a struct is known as using **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore.
 
 ### data structures for your locks
 
