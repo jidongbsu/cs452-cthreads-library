@@ -423,7 +423,7 @@ initial balance = 0.000000
 final balance = 177966376.000000
 ```
 
-In the above, when run "cthreads-test2 4 100" you must get 400 as the result, when run "./cthreads-test2 4 100000000", your result must be lower than 400000000, but does not have to the same number as the one showed above.
+In the above, when run "cthreads-test2 4 100" you must get 400 as the result, when run "./cthreads-test2 4 100000000", your result must be lower than 400000000, but does not have to be the same number as the one showed above.
 
 - When running cthreads-test3, you are expected to get the exactly same result as following:
 
