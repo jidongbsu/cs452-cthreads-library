@@ -79,6 +79,8 @@ int cthread_dequeue(struct Queue* queue)
         return INT_MIN;
 	}
     int tid = queue->tids[queue->front];
+	/* set the array element to -1, i.e., set it to its initial value. */
+	queue->tids[queue->front] = -1;
     queue->front = (queue->front + 1) % MAX_NUM_THREADS;
     queue->size = queue->size - 1;
     return tid;

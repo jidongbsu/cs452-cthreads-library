@@ -158,13 +158,25 @@ Among all the fields in *thread_control_block*, *ucontext_t ctx* is the field wh
 
 A global queue named *ready_queue* is defined as well as initialized like this:
 
-```
+```c
 struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {[0 ... (MAX_NUM_THREADS-1)] = -1}};
 ```
 
 This queue stores thread IDs for all ready threads. Note we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this queue.
 
-The above approach to initialize a struct is known as using **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore.
+The above approach to initialize a struct is known as using **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore. The queue itself is a *struct Queue*, which is defined as following in *cthread.h*:
+
+```c
+/* a structure to represent a queue */
+struct Queue {
+    /* front and rear are both indexes, indexes of the array. */
+    int front, rear, size;
+    /* we use this queue to store tids. */
+    int tids[MAX_NUM_THREADS];
+};
+```
+
+The array *tids[]* stores tids, for the *ready_queue*, the above initialization code shows all of its 64 elements in *tids*[] are initialized to -1.
 
 ### data structures for your locks
 
@@ -225,6 +237,17 @@ int cthread_dequeue(struct Queue* queue);
 ```
 
 As their names suggest, these two functions allow you to enqueue a tid to the tail of the *queue* and dequeue a tid from the head of the *queue*, respectively. You can use these two functions to manipulate the global variable *ready_queue*, and you can also use these two functions to manipulate your semaphores' waiting queue. Keep in mind when using *cthread_dequeue*(), it may return an invalid tid to you - when the queue is empty and you still attempt to dequeue - that may suggest that you have a bug in your code.
+
+Also note that *cthread_dequeue*() has the following lines:
+
+```c
+    int tid = queue->tids[queue->front];
+    /* set the array element to -1, i.e., set it to its initial value. */
+    queue->tids[queue->front] = -1;
+    queue->front = (queue->front + 1) % MAX_NUM_THREADS;
+```
+
+which means it returns the tid at the front the queue, and then sets the corresponding element in the array to -1, which marks that this element is no longer storing a valid tid.
 
 ```c
 static int isEmpty(struct Queue* queue);
