@@ -4,10 +4,12 @@ In this assignment, we will write a user level thread library called cadillac-th
 
 ## Learning Objectives
 
-- Gaining a deep understanding of user-level thread libraries.
-- Implementing a round robin scheduler.
-- Practicing on managing a queue data structure.
 - Creating a large piece of system software in stages.
+- Gaining a deep understanding of user-level thread libraries.
+- Understanding how to implement a round robin scheduler.
+- Practicing on managing a queue data structure.
+- Understanding how to implement a lock.
+- Understanding how to implement a semaphore.
 
 ## Book References
 
@@ -61,7 +63,7 @@ cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  ct
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
 
-5 testing programs are provided in the starter code. They are cthreads-test[1-5].c. See their description in the [Testing](#testing) section.
+7 testing programs are provided in the starter code. They are cthreads-test[1-7].c. See their description in the [Testing](#testing) section.
 
 ## Specification
 
@@ -109,6 +111,16 @@ int cthread_mutex_unlock(cthread_mutex_t *mutex);
 
 The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
 
+### part 3
+
+```c
+void cthread_sem_init(cthread_sem_t *sem, int value);
+void cthread_sem_wait(cthread_sem_t *sem);
+void cthread_sem_post(cthread_sem_t *sem);
+```
+
+The user of your library calls these 3 functions to initialize a semaphore, lock a semaphore, unlock a semaphore, respectively.
+
 ## Predefined Data Structures and Global Variables
 
 ### data structure for thread control block
@@ -120,7 +132,7 @@ typedef struct {
         int exited;     // is this thread exited?
         int waiting;    // who are you (as a parent) waiting for. your waiting would be -1 if you're not waiting for anyone.
         cthread_t parent;       // parent thread id
-        ucontext_t uc;  // user thread context
+        ucontext_t ctx;  // user thread context
         char stack[STACK_SIZE]; // each thread has its own private stack
 } thread_control_block;
 ```
@@ -131,17 +143,21 @@ A global array which contains 64 elements is defined to represent all the 64 thr
 static thread_control_block tcbs[MAX_NUM_THREADS];
 ```
 
-Among all the fields in *thread_control_block*, *ucontext_t uc* is the field which enables you to switch the context from one thread to another thread. Read the [APIs](#apis) section for more details.
+Here *MAX_NUM_THREADS* is defined as 64 (in cthreads.h), and in this assignment we assume users will run no more than 64 threads.
+
+Among all the fields in *thread_control_block*, *ucontext_t ctx* is the field which enables you to switch the context from one thread to another thread. Read the [APIs](#apis) section for more details.
 
 ### data structures to track active thread IDs
 
 A global queue named *ready_queue* is defined as well as initialized like this:
 
 ```
-struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {-1}};
+struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {[0 ... (MAX_NUM_THREADS-1)] = -1}};
 ```
 
 This queue stores thread IDs for all ready threads. Note we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this queue.
+
+You are recommended to use this same approach to initialize the queue of your semaphore.
 
 ### data structures for your locks
 
@@ -155,6 +171,24 @@ typedef struct {
 
 It only has one field - *lock*. You can use it like this: when *lock* is 1, it means the lock is held; when *lock* is 0, it means the lock is available.
 
+### data structures for your semaphores
+
+We define ** in cthreads.h.
+
+```c
+typedef struct {
+    /* this can be negative, and when it's negative, 
+     * it is equal to the number of waiting threads.
+     * */
+    int count;
+    cthread_mutex_t mutex;
+    /* if you can't get the semaphore, then put yourself in this waiting queue. */
+    struct Queue queue;
+} cthread_sem_t;
+```
+
+Here the field *mutex* is used to protect the semaphore itself, in other words, when you access *count* or *queue*, you want to use *mutex* to protect them.
+
 ### global variables
 
 ```c
@@ -167,7 +201,7 @@ You can use this global variable to track if *cthread_init*() is called already 
 static cthread_t current_tid;
 ```
 
-You should initialize to the tid of the main thread. Anytime a context switch is about to occur, we update this variable to store the tid of the thread that is chosen to run.
+You should initialize *current_tid* to the tid of the main thread. Anytime a context switch is about to occur, we update this variable to store the tid of the thread that is chosen to run.
 
 ```c
 /* a global variable, we increment this by one every time we create a thread */
@@ -222,14 +256,14 @@ int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg
 	...
 	/* add code here so that tcb will point to (the address of) the right tcbs[] element */
 	...
-	getcontext(&tcb->uc);
+	getcontext(&tcb->ctx);
 	/* ss_sp stores the starting address of the stack, which in our case, is tcb->stack. */
-	tcb->uc.uc_stack.ss_sp = (void *) tcb->stack;
-	tcb->uc.uc_stack.ss_size = STACK_SIZE;
+	tcb->ctx.uc_stack.ss_sp = (void *) tcb->stack;
+	tcb->ctx.uc_stack.ss_size = STACK_SIZE;
 	...
 	/* add code here to initialize other fields of tcb, such as waiting, exited, parent... */
 	...
-	makecontext(&tcb->uc, (void(*)(void))start_routine, 1, arg);
+	makecontext(&tcb->ctx, (void(*)(void))start_routine, 1, arg);
 	...
 }
 ```
@@ -245,7 +279,7 @@ static int cthread_init() {
 	...
 	/* add code here so that tcb will point to (the address of) the right tcbs[] element */
 	...
-	getcontext(&tcb->uc);
+	getcontext(&tcb->ctx);
 	/* add code here to initialize other fields of tcb, such as waiting, exited, parent... */
 	...
 }
@@ -257,7 +291,7 @@ static int cthread_init() {
 int setitimer(int which, const struct itimerval *new_value, struct itimerval *old_value);
 ```
 
-Read the man page of this function to see how to use it. You will need to use this function so as to set a timer, which goes off every 50 milliseconds, which is why the starter code has this line (in cthreads.c):
+Read the man page of this function to see how to use it. You will need to use this function so as to set a timer, which goes off every 50 milliseconds, which is why the starter code has this line (in cthreads.h):
 
 ```c
 #define QUANTUM  50000
@@ -344,11 +378,12 @@ Think about in which function you want to call this.
 
 ## Testing 
 
-5 testing programs are provided in the starter code. They are cthreads-test[1-5].c. Once you run make, you will generate the binary files of these testing programs.
+5 testing programs are provided in the starter code. They are cthreads-test[1-7].c. Once you run make, you will generate the binary files of these testing programs.
 
-- cthreads-test1 tests thread creation, join, exit; 
-- cthreads-test2 tests thread creation, join, exit, as well as thread schedule.
-- cthreads-test[3-5] tests thread creation, join, exit, schedule, as well as locks; 
+- cthreads-test1 tests thread creation, join, exit.
+- cthreads-test2 tests thread creation, join, exit, and thread schedule.
+- cthreads-test[3-5] tests thread creation, join, exit, schedule, and locks.
+- cthreads-test[6-7] tests thread creation, join, exit, schedule, locks, and semaphores;.
 
 ## Expected Results
 
@@ -427,7 +462,7 @@ main: exiting
 
 In the above, the order of which thread exits first, which thread exits next, does not matter. But all 32 threads need to exit before the main thread exits.
 
-- When running cthreads-test3, you are expected to get the exactly same result as following:
+- When running cthreads-test5, you are expected to get the exactly same result as following:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test5
@@ -435,8 +470,25 @@ main: output "foobar" 10 times in a row:
 foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 main: exiting
 ```
+- When running cthreads-test6, you are expected to get the exactly same result as following:
 
-As you can see, *cthread-test5* is just a solution to Leetcode problem No.1115 - print FooBar alternately.
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test6
+main: output "foobar" 10 times in a row:
+foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
+main: exiting
+```
+As you can see, *cthread-test5* and *cthread-test6* produce the same result. They are just two different solutions to Leetcode problem No.1115 - print FooBar alternately. *cthread-test5* uses locks. *cthread-test6* uses semaphores.
+
+- When running cthreads-test6, you are expected to get the exactly same result as following:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test7
+main: building H2O:
+HHOHHOHHOHHOHHO
+main: exiting
+```
+In theory, your result might looks different than the above result. Refer to Leetcode problem No.1117 - Building H2O, and see what other results are also acceptable.
 
 ## Submission
 
@@ -452,9 +504,11 @@ Grade: /100
 - [ 80 pts] Functional Requirements:
   - [10 pts] thread create, join, exit works correctly - tested by cthreads-test1.
   - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test2.
-  - [20 pts] thread schedule, lock/unlock works correctly - tested by cthreads-test3.
-  - [20 pts] thread schedule, lock/unlock works correctly - tested by cthreads-test4.
-  - [20 pts] thread schedule, lock/unlock works correctly - tested by cthreads-test5.
+  - [20 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test3.
+  - [10 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test4.
+  - [10 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test5.
+  - [10 pts] thread schedule, lock/unlock, and semaphore work correctly - tested by cthreads-test6.
+  - [10 pts] thread schedule, lock/unlock, and semaphore work correctly - tested by cthreads-test7.
 
 - [10 pts] Compiler warnings:
   - Each compiler warning will result in a 3 point deduction.

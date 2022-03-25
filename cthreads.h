@@ -4,6 +4,9 @@
 #include <ucontext.h> /* for user thread context */
 #include <sched.h> /* for struct sched_param - which unfortunately is useless in this program... */
 
+#define TRUE 1
+#define FALSE 0
+
 #define STACK_SIZE  64*1024 /* we choose 64k as our stack size, for each thread */
 #define MAX_NUM_THREADS   64  /* we limit our maximum number of threads to be 64 */
 #define QUANTUM  50000 /* alarm goes off every 50 milliseconds, setitimer may fail (return -1) if this number is too big  */

@@ -11,7 +11,7 @@
 static thread_control_block tcbs[MAX_NUM_THREADS];
 
 /* initialization flag, set this to true when cthread_init() is called already. */
-int initialized = 0;
+int initialized = FALSE;
 
 /* id of the current running thread.
  * current_tid changes in 5 situations:
