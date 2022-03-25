@@ -1,11 +1,35 @@
 CC=gcc
 AR = ar
-CFLAGS=-Wall -MMD -g -O0 -fPIC -Wpointer-arith -std=gnu89 -MP
+#LD = ld
+CFLAGS=-Wall -MMD -g -O0 -fPIC -Wpointer-arith -std=gnu89 -MP -Wno-unused-function -Wno-unused-variable
 
 LIBOBJS = cthreads.a
 
 OBJS =  cthreads-test1 cthreads-test2 cthreads-test3\
-	cthreads-test4 cthreads-test5\
+	cthreads-test4 cthreads-test5 cthreads-test6\
+	cthreads-test7\
+
+#cthreads.so: $(LIBOBJS)
+#	$(LD) -shared -o $@  $(LIBOBJS)
+
+#cthreads.a: $(LIBOBJS)
+#	$(AR)  rcv $@ $(LIBOBJS)
+#	ranlib $@
+
+#cthreads-test1: cthreads-test1.o cthreads.a
+#	$(CC) $(CFLAGS) -o $@ $?
+
+#cthreads-test2: cthreads-test2.o cthreads.a
+#	$(CC) $(CFLAGS) -o $@ $?
+
+#cthreads-test3: cthreads-test3.o cthreads.a
+#	$(CC) $(CFLAGS) -o $@ $?
+
+#cthreads-test4: cthreads-test4.o cthreads.a
+#	$(CC) $(CFLAGS) -o $@ $?
+
+#cthreads-test5: cthreads-test5.o cthreads.a
+#	$(CC) $(CFLAGS) -o $@ $?
 
 build = \
 	@if [ -z "$V" ]; then \
@@ -21,6 +45,9 @@ build = \
 
 %.o : %.c
 	$(call build,CC,$(CC) $(CFLAGS) -c $< -o $@)
+
+#%.so: %.o
+#	$(call build,LD,$(LD) -shared -o $@ $^)
 
 %.a : %.o
 	$(call build,AR,$(AR) rcs $@ $^)

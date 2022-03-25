@@ -7,21 +7,19 @@
 #include <limits.h> /* for INT_MIN */
 #include "cthreads.h"
 
-#define MAX_NUM_THREADS 64	/* we limit our maximum number of threads to be 64 */
-#define QUANTUM 50000	/* alarm goes off every 50 milliseconds, setitimer may fail (return -1) if this number is too big  */
-
 /* an array for all 64 thread control blocks */
 static thread_control_block tcbs[MAX_NUM_THREADS];
 
 /* initialization flag, set this to true when cthread_init() is called already. */
-int initialized = FALSE;
+int initialized = 0;
 
 /* id of the current running thread.
- * current_tid changes in 4 situations:
- * 1. schedule
- * 2. calling lock finds lock is held
- * 3. child exit - child wants to wake up parent (or let someone else run)
- * 4. parent join - because parent wants to wait
+ * current_tid changes in 5 situations:
+ * 1. schedule.
+ * 2. calling lock finds lock is held.
+ * 3. child exit - child wants to wake up parent (or let someone else run).
+ * 4. parent join - because parent wants to wait.
+ * 5. calling sem_wait finds semaphore not available.
  **/
 static cthread_t current_tid;
 
@@ -39,29 +37,21 @@ struct itimerval time_quantum;
 static struct sigaction scheduler;
 
 /* when this flag is one, tells the schedule not to schedule me out */
-static char no_schedule = 0;
+static int no_schedule = 0;
 
 /* a global variable, we increment this by one every time we create a thread */
 cthread_t tid_idx = 0;
 
 /* Part 0: the ready queue, which is a circular queue, kind of... */
 
-/* a structure to represent a queue */
-struct Queue {
-	/* front and rear are both indexes, indexes of the array. */
-    int front, rear, size;
-	/* we use this queue to store tids. */
-    int tids[MAX_NUM_THREADS];
-};
-
-/* is queue full? 
+/* is queue full?
  * functions not exported to outside should be declared as static. */
 static int isFull(struct Queue* queue)
 {
     return (queue->size == MAX_NUM_THREADS);
 }
 
-/* is queue empty? 
+/* is queue empty?
  * functions not exported to outside should be declared as static. */
 static int isEmpty(struct Queue* queue)
 {
@@ -94,10 +84,10 @@ int cthread_dequeue(struct Queue* queue)
     return tid;
 }
 
-/* ready queue. we put thread IDs into this queue so they will be scheduled. a fancy way to initialize this struct.
- */
-
-struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {-1}};
+/* ready queue. we put thread IDs into this queue so they will be scheduled. 
+ * a fancy way to initialize this struct: this is the so called using a designated initializer.
+ * note: the way of initializing of an array like this only works if the compiler is gcc. */
+struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, .tids = {[0 ... (MAX_NUM_THREADS-1)] = -1}};
 
 /* Part 1: threads */
 
@@ -111,15 +101,20 @@ static void cthread_schedule(int sig) {
 
 /* initialize this library - functions not exported to outside should be declared as static. */
 static int cthread_init() {
+	return 0;
 }
 
-/* starts a new thread in the calling process.
- * the new thread starts execution by invoking start_routine();
+/* starts a new thread in the calling process. 
+ * the new thread starts execution by invoking start_routine(); 
  * arg is passed as the sole argument of start_routine().
- * before returning, a successful call to cthread_create() stores
+ * before returning, a successful call to cthread_create() stores 
  * the ID of the new thread in the buffer pointed to by thread;
+ * on success, returns 0; otherwise, prints an error message and exits.
  */
+
 int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg) {
+	return 0;
+}
 
 /* terminates the calling thread and returns a value via retval that
  * (if the thread is joinable) is available to another thread
@@ -131,11 +126,11 @@ int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg
 void cthread_exit(void *retval) {
 }
 
-/* waits for the thread specified by thread to terminate.
- * if that thread has already terminated, then cthread_join() returns immediately.
+/* waits for the thread specified by thread to terminate. 
+ * if that thread has already terminated, then cthread_join() returns immediately. 
  * only threads who have kids are supposed to call join.
  * on success, cthread_join() returns 0; on error, we print an error message and exit.
- * in this assignment, we do not use retval;
+ * in this assignment, we do not use retval; 
  * plus, in our applications, right now, we do not use the return value of cthread_join().
  */
 int cthread_join(cthread_t thread, void **retval) {
@@ -149,9 +144,7 @@ int cthread_mutex_init(cthread_mutex_t *mutex) {
 	return 0;
 }
 
-/* test and set; matches with the book chapter.
- */
-
+/* test and set; matches with the book chapter. */
 static inline uint xchg(volatile unsigned int *old_ptr, unsigned int new) {
 	uint old;
 	asm volatile("lock; xchgl %0, %1" :
@@ -172,6 +165,24 @@ int cthread_mutex_lock(cthread_mutex_t *mutex) {
 /* unlock a mutex, returns 0 if successful. */
 int cthread_mutex_unlock(cthread_mutex_t *mutex) {
 	return 0;
+}
+
+/* Part 3: semaphores */
+
+/* initialize a semaphore, no need to return anything. */
+void cthread_sem_init(cthread_sem_t *sem, int value) {
+}
+
+/* lock a semaphore, no need to return anything. */
+/* note: in sema_wait, we will change current_tid if we decide to wait;
+ * but in sema_post, we should not change current_tid no matter what, because
+ * in sema_post we wake up another thread but we don't necessarily need to switch to
+ * that thread. */
+void cthread_sem_wait(cthread_sem_t *sem) {
+}
+
+/* unlock a semaphore, no need to return anything. */
+void cthread_sem_post(cthread_sem_t *sem) {
 }
 
 /* vim: set ts=4: */
