@@ -144,7 +144,7 @@ typedef struct {
 } thread_control_block;
 ```
 
-A global array which contains 64 elements is defined to represent all the 64 thread control blocks.
+We use each instance of *thread_control_block* to represent one thread. A global array which contains 64 elements is defined to represent all the 64 thread control blocks.
 
 ```c
 static thread_control_block tcbs[MAX_NUM_THREADS];
