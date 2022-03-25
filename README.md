@@ -393,7 +393,7 @@ Think about in which function you want to call this.
 
 ## Testing 
 
-5 testing programs are provided in the starter code. They are cthreads-test[1-7].c. Once you run make, you will generate the binary files of these testing programs.
+7 testing programs are provided in the starter code. They are cthreads-test[1-7].c. Once you run make, you will generate the binary files of these testing programs.
 
 - cthreads-test1 tests thread creation, join, exit.
 - cthreads-test2 tests thread creation, join, exit, and thread schedule.
