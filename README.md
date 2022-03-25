@@ -130,7 +130,7 @@ The user of your library calls these 3 functions to initialize a semaphore, lock
 
 ## Predefined Data Structures and Global Variables
 
-### data structure for thread control block
+### data structures for thread control blocks
 
 A global struct data structure is defined in cthreads.h:
 
@@ -164,7 +164,7 @@ struct Queue ready_queue = {.front = 0, .rear = MAX_NUM_THREADS - 1, .size = 0, 
 
 This queue stores thread IDs for all ready threads. Note we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this queue.
 
-You are recommended to use this same approach to initialize the queue of your semaphore.
+The above approach to initialize a struct is known as using **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore.
 
 ### data structures for your locks
 
@@ -180,7 +180,7 @@ It only has one field - *lock*. You can use it like this: when *lock* is 1, it m
 
 ### data structures for your semaphores
 
-We define ** in cthreads.h.
+We define *cthread_sem_t* in cthreads.h.
 
 ```c
 typedef struct {
