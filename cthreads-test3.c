@@ -1,9 +1,7 @@
-
 /*
-   synchronization-part1/safe-bank-balance.c
-   Uses Pthread Mutexes (binary semaphores) to protect the bank balance
-   variable. This isn't very good coding style. For a better way to code
-   this see ch9/monitors/account folder.
+   synchronization-part1/bad-bank-balance.c
+   A multi-threaded program where a shared global variable is updated by
+   multiple threads, causing a race condition.
 
    @author amit
 */
@@ -16,7 +14,6 @@
 typedef struct account account;
 struct account {
 	double balance;
-	cthread_mutex_t mutex;
 };
 account *myacct;
 
@@ -37,16 +34,15 @@ int main(int argc, char **argv)
 	numThreads  = atoi(argv[1]);
 	count = atoi(argv[2]);
 	if (numThreads > 32) {
-		fprintf(stderr, "Usage: %s Too many threads specified. Defaulting to 32.\n", argv[0]);
+		fprintf(stderr, "Usage: %s Too many threads  specified. Defaulting to 32.\n", argv[0]);
 		numThreads = 32;
 	}
 
 	myacct = (account *) malloc(sizeof(account));
 	myacct->balance = 0.0;
-	cthread_mutex_init(&(myacct->mutex));
 	printf("initial balance = %lf\n", myacct->balance);
 
-
+	/* allocate an array from the heap. */
     tids = (cthread_t *) malloc(sizeof(cthread_t)*numThreads);
     for (i=0; i<numThreads; i++)
         cthread_create(&tids[i], threadMain, (void *) NULL);
@@ -65,10 +61,10 @@ void *threadMain(void *arg)
 
 	for (i=0; i<count; i++) {
 		amount = 1;
-		cthread_mutex_lock(&(myacct->mutex));
 		myacct->balance += amount;
-		cthread_mutex_unlock(&(myacct->mutex));
 	}
 	cthread_exit(NULL);
 	return NULL;
 }
+
+/* vim: set ts=4: */

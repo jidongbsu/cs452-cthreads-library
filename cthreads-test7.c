@@ -1,4 +1,4 @@
-/* This is the solution to leetcode problem No.1117, Building H2O.
+/* This is the solution to leetcode problem No.1115, print FooBar alternately.
  * author: Jidong Xiao
  * */
 
@@ -9,103 +9,77 @@
 
 char str[50];
 
-void releaseHydrogen(){
-        strcat(str, "H");
+void printFoo(){
+        strcat(str, "foo");
 }
 
-void releaseOxygen(){
-        strcat(str, "O");
+void printBar(){
+        strcat(str, "bar");
 }
 
 typedef struct {
-    // User defined data may be declared here.
-	/* H waits for H */
-    cthread_sem_t semH;
-	/* O waits for O */
-    cthread_sem_t semO;
-	/* H waits for O */
-    cthread_sem_t semHO;
-	/* O waits for H */
-    cthread_sem_t semOH;
-} H2O;
+    int n;
+    cthread_sem_t sema1;
+    cthread_sem_t sema2;
+} FooBar;
 
-H2O* h2oCreate() {
-    H2O* obj = (H2O*) malloc(sizeof(H2O));
-    
-    // Initialize user defined data here.
-    cthread_sem_init(&(obj->semH),2);
-    cthread_sem_init(&(obj->semO),1);
-    cthread_sem_init(&(obj->semHO),0);
-    cthread_sem_init(&(obj->semOH),0);
+FooBar* fooBarCreate(int n) {
+    FooBar* obj = (FooBar*) malloc(sizeof(FooBar));
+    obj->n = n;
+    /* initialize both semaphores to 0, and thus it is used as a binary semaphore. */
+    cthread_sem_init(&(obj->sema1),0);
+    cthread_sem_init(&(obj->sema2),0);
     return obj;
 }
 
-void* hydrogen(void* orig_obj) {
-	H2O *obj = (H2O *)orig_obj;
-    cthread_sem_wait(&(obj->semH)); // semaphore so that only 2 hydrogen can get in
-    cthread_sem_wait(&(obj->semHO));
-    cthread_sem_post(&(obj->semOH));
-    // releaseHydrogen() outputs "H". Do not change or remove this line.
-    releaseHydrogen();
-    cthread_sem_post(&(obj->semH)); // wake up other hydrogen threads
+void* foo(void* orig_obj) {
+    int i;
+    FooBar *obj = (FooBar *)orig_obj;
+    for (i = 0; i < obj->n; i++) {
+        // printFoo() outputs "foo". Do not change or remove this line.
+        printFoo();
+        cthread_sem_post(&(obj->sema1));
+        cthread_sem_wait(&(obj->sema2));
+    }
     cthread_exit(NULL);
     return NULL; // returning here just avoid the compiler warning saying "warning: control reaches end of non-void function"
-
 }
 
-void* oxygen(void* orig_obj) {
-	H2O *obj = (H2O *)orig_obj;
-    cthread_sem_wait(&(obj->semO)); // lock so that only 1 oxygen can get in
-    cthread_sem_post(&(obj->semHO));
-    cthread_sem_post(&(obj->semHO));
-    cthread_sem_wait(&(obj->semOH)); // wait two hydrogen threads, thus get woken up twice.
-    cthread_sem_wait(&(obj->semOH));
-    // releaseOxygen() outputs "O". Do not change or remove this line.
-    releaseOxygen();
-    cthread_sem_post(&(obj->semO)); // wake up other oxygen threads
+void* bar(void* orig_obj) {
+    int i;
+    FooBar *obj = (FooBar *)orig_obj;
+    for (i = 0; i < obj->n; i++) {
+        cthread_sem_wait(&(obj->sema1));
+        // printBar() outputs "bar". Do not change or remove this line.
+        printBar();
+        cthread_sem_post(&(obj->sema2));
+    }
     cthread_exit(NULL);
     return NULL; // returning here just avoid the compiler warning saying "warning: control reaches end of non-void function"
-
 }
 
-void h2oFree(H2O* obj) {
-    // User defined data may be cleaned up here.
+void fooBarFree(FooBar* obj) {
+    /* unliked the leetcode problem, here we do not need to call sem destroy function. */
     free(obj);
 }
 
 int main(int argc, char *argv[]) {
-	int i;
-	/* warning: the num of h threads must be 2x the num of o threads, otherwise we will get a deadlock situation. */
-	int num_hthreads=10;
-	int num_othreads=5;
-	cthread_t *htids = (cthread_t *)malloc(sizeof(cthread_t)*num_hthreads);
-	cthread_t *otids = (cthread_t *)malloc(sizeof(cthread_t)*num_othreads);
+    cthread_t tids[2];
+    int n = 10;
 
-    H2O *obj = h2oCreate();
+    FooBar *obj = fooBarCreate(n);
 
-	for(i=0;i<num_hthreads;i++){
-		cthread_create(&htids[i], hydrogen, (void *)obj);
-	}
+    cthread_create(&tids[0], foo, (void *)obj);
+    cthread_create(&tids[1], bar, (void *)obj);
 
-	for(i=0;i<num_othreads;i++){
-		cthread_create(&otids[i], oxygen, (void *)obj);
-	}
+    cthread_join(tids[0], NULL);
+    cthread_join(tids[1], NULL);
 
-	for(i=0;i<num_hthreads;i++){
-    	cthread_join(htids[i], NULL);
-	}
+    fooBarFree(obj);
 
-	for(i=0;i<num_othreads;i++){
-    	cthread_join(otids[i], NULL);
-	}
-
-    h2oFree(obj);
-
-    printf("main: building H2O:\n");
+    printf("main: output \"foobar\" %d times in a row:\n", n);
     printf("%s\n", str);
     printf("main: exiting\n");
 
     return 0;
 }
-
-/* vim: set ts=4: */

@@ -61,12 +61,13 @@ The starter code looks like this.
 
 ```console
 (base) [jidongxiao@onyx cs452-cthreads-library]$ ls
-cthreads.c  cthreads.h  cthreads-test1.c  cthreads-test2.c  cthreads-test3.c  cthreads-test4.c  cthreads-test5.c  cthreads-test6.c  cthreads-test7.c  Makefile  README.md  README.template
+cthreads.c  cthreads-test1.c  cthreads-test3.c  cthreads-test5.c  cthreads-test7.c  Makefile   README.template
+cthreads.h  cthreads-test2.c  cthreads-test4.c  cthreads-test6.c  cthreads-test8.c  README.md
 ```
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
 
-7 testing programs are provided in the starter code. They are cthreads-test[1-7].c. See their description in the [Testing](#testing) section.
+8 testing programs are provided in the starter code. They are cthreads-test[1-8].c. See their description in the [Testing](#testing) section.
 
 ## Specification
 
@@ -78,7 +79,7 @@ You are required to implement the following functions:
 int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg);
 ```
 
-This function creates a new thread. The new thread starts execution by invoking *start_routine*(); *arg* is passed as the sole argument of *start_routine*(). Before returning, a successful call to *cthread_create*() stores the ID of the new thread in the address pointed to by thread; the user who uses your library is responsible for allocating memory for the address pointed to by *thread*. It is also the user's responsibility to define the *start_routine*() and pass the correct *arg*.
+This function creates a new thread. The new thread starts execution by invoking *start_routine*(); *arg* is passed as the sole argument of *start_routine*(). Before returning, a successful call to *cthread_create*() stores the ID of the new thread in the address pointed to by *thread* - *cthread_t* is just an integer type, and thus *thread* is an integer type pointer. The user who uses your library is responsible for allocating memory for the address pointed to by *thread*. It is also the user's responsibility to define the *start_routine*() and pass the correct *arg*.
 
 ```c
 static int cthread_init();
@@ -104,7 +105,7 @@ static void cthread_schedule(int sig);
 
 This function implements the round robin scheduling. In this assignment, we do not intend to use the argument *sig*.
 
-**Warning**: Move on to part 2 only if part 1 is implemented and you have passed *cthreads-test[1-2]*.
+**Warning**: Move on to part 2 only if part 1 is implemented and you have passed *cthreads-test[1-3]*.
 
 ### part 2
 
@@ -116,7 +117,7 @@ int cthread_mutex_unlock(cthread_mutex_t *mutex);
 
 The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
 
-**Warning**: Move on to part 3 only if part 2 is implemented and you have passed *cthreads-test[3-5]*.
+**Warning**: Move on to part 3 only if part 2 is implemented and you have passed *cthreads-test[4-6]*.
 
 ### part 3
 
@@ -430,12 +431,11 @@ Think about in which function you want to call this.
 
 ## Testing 
 
-7 testing programs are provided in the starter code. They are cthreads-test[1-7].c. Once you run make, you will generate the binary files of these testing programs.
+8 testing programs are provided in the starter code. They are cthreads-test[1-8].c. Once you run make, you will generate the binary files of these testing programs.
 
-- cthreads-test1 tests thread creation, join, exit.
-- cthreads-test2 tests thread creation, join, exit, and thread schedule.
-- cthreads-test[3-5] tests thread creation, join, exit, schedule, and locks.
-- cthreads-test[6-7] tests thread creation, join, exit, schedule, locks, and semaphores;.
+- cthreads-test[1-3] tests threads creation, join, exit, and schedule.
+- cthreads-test[4-6] tests threads creation, join, exit, schedule, and locks.
+- cthreads-test[7-8] tests threads creation, join, exit, schedule, locks, and semaphores;.
 
 ## Expected Results
 
@@ -449,20 +449,16 @@ B
 main: end
 ```
 
-- When running cthreads-test2, you are expected to get:
+- When running cthreads-test2, you are expected to get the exactly same result as following:
 
 ```console
-(base) [jidongxiao@onyx cthreads]$ ./cthreads-test2 4 100
-initial balance = 0.000000
-final balance = 400.000000
-(base) [jidongxiao@onyx cthreads]$ ./cthreads-test2 4 100000000
-initial balance = 0.000000
-final balance = 177966376.000000
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test2
+sum is 600
 ```
 
-In the above, when run "cthreads-test2 4 100" you must get 400 as the result, when run "./cthreads-test2 4 100000000", your result must be lower than 400000000, but does not have to be the same number as the one showed above.
+Note that *cthread-test2* uses multiple threads to compute the sum of an array, and your testing result must be 600.
 
-- When running cthreads-test3, you are expected to get the exactly same result as following:
+- When running cthreads-test3, you are expected to get:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test3 4 100
@@ -470,13 +466,26 @@ initial balance = 0.000000
 final balance = 400.000000
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test3 4 100000000
 initial balance = 0.000000
+final balance = 177966376.000000
+```
+
+In the above, when run "cthreads-test3 4 100" you must get 400 as the result, when run "./cthreads-test3 4 100000000", your result must be lower than 400000000, but does not have to be the same number as the one showed above.
+
+- When running cthreads-test4, you are expected to get the exactly same result as following:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test4 4 100
+initial balance = 0.000000
+final balance = 400.000000
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test4 4 100000000
+initial balance = 0.000000
 final balance = 400000000.000000
 ```
 
-- When running cthreads-test4, you are expected to get a result similar to this:
+- When running cthreads-test5, you are expected to get a result similar to this:
 
 ```console
-(base) [jidongxiao@onyx cthreads]$ ./cthreads-test4
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test5
 thread 1 exiting
 thread 2 exiting
 thread 5 exiting
@@ -514,14 +523,6 @@ main: exiting
 
 In the above, the order of which thread exits first, which thread exits next, does not matter. But all 32 threads need to exit before the main thread exits.
 
-- When running cthreads-test5, you are expected to get the exactly same result as following:
-
-```console
-(base) [jidongxiao@onyx cthreads]$ ./cthreads-test5
-main: output "foobar" 10 times in a row:
-foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
-main: exiting
-```
 - When running cthreads-test6, you are expected to get the exactly same result as following:
 
 ```console
@@ -530,12 +531,20 @@ main: output "foobar" 10 times in a row:
 foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 main: exiting
 ```
-As you can see, *cthreads-test5* and *cthreads-test6* produce the same result. They are just two different solutions to [Leetcode problem No.1115 - Print FooBar Alternately](https://leetcode.com/problems/print-foobar-alternately/). *cthreads-test5* uses locks. *cthreads-test6* uses semaphores.
-
-- When running cthreads-test7, you are expected to get results like this:
+- When running cthreads-test7, you are expected to get the exactly same result as following:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test7
+main: output "foobar" 10 times in a row:
+foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
+main: exiting
+```
+As you can see, *cthreads-test6* and *cthreads-test7* produce the same result. They are just two different solutions to [Leetcode problem No.1115 - Print FooBar Alternately](https://leetcode.com/problems/print-foobar-alternately/). *cthreads-test6* uses locks. *cthreads-test7* uses semaphores.
+
+- When running cthreads-test8, you are expected to get results like this:
+
+```console
+(base) [jidongxiao@onyx cthreads]$ ./cthreads-test8
 main: building H2O:
 HHOHHOHHOHHOHHO
 main: exiting
@@ -554,13 +563,14 @@ All files necessary for compilation and testing need to be submitted, this inclu
 Grade: /100
 
 - [ 80 pts] Functional Requirements:
-  - [10 pts] thread create, join, exit works correctly - tested by cthreads-test1.
-  - [10 pts] thread create, schedule, join, exit works correctly - tested by cthreads-test2.
-  - [10 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test3.
-  - [15 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test4.
-  - [15 pts] thread schedule and lock/unlock work correctly - tested by cthreads-test5.
-  - [10 pts] thread schedule, lock/unlock, and semaphore work correctly - tested by cthreads-test6.
-  - [10 pts] thread schedule, lock/unlock, and semaphore work correctly - tested by cthreads-test7.
+  - [10 pts] threads create, schedule, join, exit work correctly - tested by cthreads-test1.
+  - [10 pts] threads create, schedule, join, exit work correctly - tested by cthreads-test2.
+  - [10 pts] threads create, schedule, join, exit work correctly - tested by cthreads-test3.
+  - [10 pts] threads schedule and lock/unlock work correctly - tested by cthreads-test4.
+  - [10 pts] threads schedule and lock/unlock work correctly - tested by cthreads-test5.
+  - [10 pts] threads schedule and lock/unlock work correctly - tested by cthreads-test6.
+  - [10 pts] threads schedule, lock/unlock, and semaphores work correctly - tested by cthreads-test7.
+  - [10 pts] threads schedule, lock/unlock, and semaphores work correctly - tested by cthreads-test8.
 
 - [10 pts] Compiler warnings:
   - Each compiler warning will result in a 3 point deduction.

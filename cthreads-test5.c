@@ -1,86 +1,78 @@
-/* This is the solution to leetcode problem No.1115, print FooBar alternately.
- * author: Jidong Xiao
- * */
-
-#include <stdio.h> /* for printf */
-#include <stdlib.h> /* for malloc */
-#include <string.h> /* for strcat */
+#include <stdio.h>
+#include <stdlib.h>
 #include "cthreads.h"
 
-char str[50];
+#define N 32
 
-typedef struct {
-    int n;
-    cthread_mutex_t mutex1;
-    cthread_mutex_t mutex2;
-} FooBar;
+cthread_mutex_t forks[N];
 
-void printFoo(){
-		strcat(str, "foo");
+/* this function calculates the lucas series, the lucas series
+ * goes like this: 2, 1, 3, 4, 7, 11, 18, 29, 47, 76, 123... */
+int lucas(int n){
+	if(n == 0)
+		return 2;
+	if(n == 1)
+		return 1;
+
+//    printf("lucas number %d is %d\n", n, b);
+	return (lucas(n - 1) + lucas(n - 2));
 }
 
-void printBar(){
-		strcat(str, "bar");
+/* the two helper functions from the book chapter. */
+
+int left(int p)  { return p; }
+int right(int p) { return (p + 1) % N; }
+
+/* get and put forks function from the bokk chapter */
+
+void get_forks(int p) {
+	if(p == N) {
+		cthread_mutex_lock(&forks[right(p)]);
+		cthread_mutex_lock(&forks[left(p)]);
+	} else {
+		cthread_mutex_lock(&forks[left(p)]);
+		cthread_mutex_lock(&forks[right(p)]);
+	}
 }
 
-FooBar* fooBarCreate(int n) {
-    FooBar* obj = (FooBar*) malloc(sizeof(FooBar));
-    cthread_mutex_init(&obj->mutex1);
-    cthread_mutex_init(&obj->mutex2);
-    cthread_mutex_lock(&obj->mutex2);
-    obj->n = n;
-    return obj;
+void put_forks(int p) {
+	cthread_mutex_unlock(&forks[left(p)]);
+	cthread_mutex_unlock(&forks[right(p)]);
 }
 
-void* foo(void* orig_obj) {
+void* philosopher(void *arg) {
+    long p;
 
-	int i;
-	FooBar *obj = (FooBar *)orig_obj;
-    for (i = 0; i < obj->n; i++) {
-        cthread_mutex_lock(&obj->mutex1);
-        // printFoo() outputs "foo". Do not change or remove this line.
-        printFoo();
-        cthread_mutex_unlock(&obj->mutex2);
-    }
-	cthread_exit(NULL);
-	return NULL; // returning here just avoid the compiler warning saying "warning: control reaches end of non-void function"
-}
+    p = (long) arg;
+    p = p+1;
 
-void* bar(void* orig_obj) {
+	/* unlike the book chapter which uses a infinite while(1) loop, we do some computation and exit */
+	lucas(30);
+	get_forks(p);
+	lucas(30);
+	put_forks(p);
 
-	int i;
-	FooBar *obj = (FooBar *)orig_obj;
-    for (i = 0; i < obj->n; i++) {
-        cthread_mutex_lock(&obj->mutex2);
-        // printBar() outputs "bar". Do not change or remove this line.
-        printBar();
-        cthread_mutex_unlock(&obj->mutex1);
-    }
-	cthread_exit(NULL);
-	return NULL; // returning here just avoid the compiler warning saying "warning: control reaches end of non-void function"
-}
-
-void fooBarFree(FooBar* obj) {
-	/* unliked the leetcode problem, here we do not need to call mutex destroy function. */
-    free(obj);
+    printf("thread %ld exiting\n", p);
+    cthread_exit(NULL);
+    return NULL;
 }
 
 int main(int argc, char *argv[]) {
-    cthread_t tids[2];
-	int n = 10;
+    cthread_t tids[N];
+    long i; // it seems we will get a compiler warning if we change this long to int.
+    
+    for (i = 0; i < N; i++) {
+        cthread_mutex_init(&forks[i]);
+    }
 
-	FooBar *obj = fooBarCreate(n);
+    for (i = 0; i < N; i++) {
+        cthread_create(&tids[i], philosopher, (void *)i);
+    }
 
-	cthread_create(&tids[0], foo, (void *)obj);
-	cthread_create(&tids[1], bar, (void *)obj);
+    for (i = 0; i < N; i++) {
+        cthread_join(tids[i], NULL);
+    }
 
-	cthread_join(tids[0], NULL);
-	cthread_join(tids[1], NULL);
-
-	fooBarFree(obj);
-
-    printf("main: output \"foobar\" %d times in a row:\n", n);
-	printf("%s\n", str);
     printf("main: exiting\n");
 
     return 0;

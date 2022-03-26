@@ -1,70 +1,57 @@
-/*
-   synchronization-part1/bad-bank-balance.c
-   A multi-threaded program where a shared global variable is updated by
-   multiple threads, causing a race condition.
+/* This multithreaded program computes the sum of an array.
+ * author: Jidong Xiao
+ * */
 
-   @author amit
-*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <stdio.h> /* for printf */
 #include "cthreads.h"
-
-typedef struct account account;
-struct account {
-	double balance;
-};
-account *myacct;
-
-void *threadMain(void *);
-cthread_t *tids;
-int numThreads;
-int count;
-
-int main(int argc, char **argv)
+  
+// size of array
+#define ARRAY_SIZE 16
+  
+// maximum number of threads
+#define MAX_NUM_OF_THREADS 4
+  
+int a[] = { 1, 5, 7, 10, 12, 14, 15, 18, 20, 22, 25, 27, 30, 64, 110, 220 };
+int total_sum = 0;
+int part = 0;
+  
+void* worker_sum(void* arg)
 {
 	int i;
+	int thread_sum = 0;
 
-	if (argc < 2) {
-		fprintf(stderr, "Usage: %s <numThreads> <iterations>\n", argv[0]);
-		exit(1);
+    // each thread computes sum of 1/4th of array
+    int thread_part = part;
+	part = part + 1;
+  
+    for (i = thread_part * (ARRAY_SIZE/4); i < (thread_part + 1) * (ARRAY_SIZE/ 4); i++){
+        thread_sum += a[i];
 	}
 
-	numThreads  = atoi(argv[1]);
-	count = atoi(argv[2]);
-	if (numThreads > 32) {
-		fprintf(stderr, "Usage: %s Too many threads  specified. Defaulting to 32.\n", argv[0]);
-		numThreads = 32;
-	}
+	total_sum = total_sum + thread_sum;
 
-	myacct = (account *) malloc(sizeof(account));
-	myacct->balance = 0.0;
-	printf("initial balance = %lf\n", myacct->balance);
-
-	/* allocate an array from the heap. */
-    tids = (cthread_t *) malloc(sizeof(cthread_t)*numThreads);
-    for (i=0; i<numThreads; i++)
-        cthread_create(&tids[i], threadMain, (void *) NULL);
-
-    for (i=0; i<numThreads; i++)
-        cthread_join(tids[i], NULL);
-
-    printf("final balance = %lf\n", myacct->balance);
-    exit(0);
-}
-
-void *threadMain(void *arg)
-{
-	int i;
-	int amount;
-
-	for (i=0; i<count; i++) {
-		amount = 1;
-		myacct->balance += amount;
-	}
 	cthread_exit(NULL);
-	return NULL;
+	return NULL; // returning here just avoid the compiler warning saying "warning: control reaches end of non-void function"
+}
+  
+// driver code
+int main()
+{
+	int i;
+    cthread_t threads[MAX_NUM_OF_THREADS];
+  
+    // creating 4 threads
+    for (i = 0; i < MAX_NUM_OF_THREADS; i++){
+        cthread_create(&threads[i], worker_sum, (void*)NULL);
+	}
+  
+    // joining 4 threads i.e. waiting for all 4 threads to complete
+    for (i = 0; i < MAX_NUM_OF_THREADS; i++){
+        cthread_join(threads[i], NULL);
+	}
+  
+	printf("sum is %d\n", total_sum);
+	return 0;
 }
 
 /* vim: set ts=4: */

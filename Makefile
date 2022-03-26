@@ -1,13 +1,13 @@
 CC=gcc
 AR = ar
 #LD = ld
-CFLAGS=-Wall -MMD -g -O0 -fPIC -Wpointer-arith -std=gnu89 -MP -Wno-unused-function -Wno-unused-variable
+CFLAGS=-Wall -MMD -g -O0 -fPIC -Wpointer-arith -std=gnu89 -MP
 
 LIBOBJS = cthreads.a
 
 OBJS =  cthreads-test1 cthreads-test2 cthreads-test3\
 	cthreads-test4 cthreads-test5 cthreads-test6\
-	cthreads-test7\
+	cthreads-test7 cthreads-test8\
 
 #cthreads.so: $(LIBOBJS)
 #	$(LD) -shared -o $@  $(LIBOBJS)
