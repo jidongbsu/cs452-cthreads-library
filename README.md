@@ -231,6 +231,17 @@ cthread_t tid_idx = 0;
 
 As the comment suggests, we use this global variable to track how many threads have been created. In this assignment, you never need to decrement this variable.
 
+```c
+/* when this flag is one, tells the schedule not to schedule me out */
+static int no_schedule = 0;
+```
+
+You are recommended to use this variable as a flag. Your *cthread_schedule*() just returns when this flag is 1. You are recommended to set this flag to 1 at the beginning of pretty much every function you are asked to implement - except *cthread_init*(). Question: then when to set this flag to 0?
+
+### other global variables
+
+There are also a few other global variables which will be described later in this README, in the [APIs](#apis) section.
+
 ## Provided Helper Functions
 
 ```c
@@ -385,6 +396,7 @@ You can initialize this variable like this:
 ```c
 scheduler.sa_handler = cthread_schedule;
 scheduler.sa_flags = SA_RESTART;
+/* the following two lines say, when the sa_handler function is in execution, all SIGPROF signals are blocked. Doing so avoids the complicated situation in which cthread_schedule() gets called in a nested way. */
 sigemptyset(&scheduler.sa_mask);
 sigaddset(&scheduler.sa_mask, SIGPROF);
 ```
