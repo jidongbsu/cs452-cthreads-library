@@ -1,6 +1,6 @@
 # Overview
 
-In this assignment, we will write a user level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions that fail to compile or run on onyx will not be graded.
+In this assignment, we will write a user-level thread library called cadillac-threads, or cthreads. Note this is NOT a kernel project, and you should just develop your code on onyx, not in your virtual machine. Submissions that fail to compile or run on onyx will not be graded.
 
 ## Learning Objectives
 
@@ -32,7 +32,7 @@ This chapter has more explanation about the round robin scheduling policy, as we
 
 ### user-level thread library vs kernel-level thread library
 
-In previous projects we used the pthreads library, which allows us to run multiple threads concurrently. The pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a separate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple threads of the same process.
+In previous assignments we used the pthreads library, which allows us to run multiple threads concurrently. The pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a separate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple threads of the same process.
 
 ```console
 (base) [jidongxiao@onyx ~]$ ps -eLf | grep test-mergesort
@@ -53,7 +53,7 @@ Serial Sorting 100000000 elements took 26.80 seconds.
 Parallel(2 levels) Sorting 100000000 elements took 8.50 seconds.
 ```
 
-In this assignment, we aim to implement a user level thread library which does not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
+In this assignment, we aim to implement a user-level thread library which does not require that much support from the kernel, and that means our threads are not visible to the kernel, and therefore they will be collectively treated as one process and the kernel will allocate time slices to this one single process. Inside this process, it is our responsibility to allocate time slices to each thread, and switch between our threads, so that every thread of our process will have a chance to run. Such a model determines that we will not be able to take advantage of multiprocessing. However, user-level threads are still expected to be fast, because they require fewer context switches between user mode and kernel mode.
 
 ## The Starter Code
 
@@ -67,7 +67,7 @@ cthreads.h  cthreads-test2.c  cthreads-test4.c  cthreads-test6.c  cthreads-test8
 
 You will be completing the cthreads.c file. You are not allowed to modify the cthreads.h file.
 
-8 testing programs are provided in the starter code. They are cthreads-test[1-8].c. See their description in the [Testing](#testing) section.
+8 testing programs are provided in the starter code. They are cthreads-test[1-8].c. See their description in the [Testing](#testing) section of this README file.
 
 ## Specification
 
@@ -115,7 +115,7 @@ int cthread_mutex_lock(cthread_mutex_t *mutex);
 int cthread_mutex_unlock(cthread_mutex_t *mutex);
 ```
 
-The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively.
+The user of your library calls these 3 functions to initialize a lock, grab a lock, release a lock, respectively. Read the chapter [Locks](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf) to have a better understanding of how these functions should be implemented.
 
 **Warning**: Move on to part 3 only if part 2 is implemented and you have passed *cthreads-test[4-6]*.
 
@@ -127,7 +127,7 @@ void cthread_sem_wait(cthread_sem_t *sem);
 void cthread_sem_post(cthread_sem_t *sem);
 ```
 
-The user of your library calls these 3 functions to initialize a semaphore, lock a semaphore, unlock a semaphore, respectively.
+The user of your library calls these 3 functions to initialize a semaphore, lock a semaphore, unlock a semaphore, respectively. Read the chapter [Semaphores](https://pages.cs.wisc.edu/~remzi/OSTEP/threads-sema.pdf) to have a better understanding of how these functions should behave.
 
 ## Predefined Data Structures and Global Variables
 
@@ -153,7 +153,7 @@ static thread_control_block tcbs[MAX_NUM_THREADS];
 
 Here *MAX_NUM_THREADS* is defined as 64 (in cthreads.h), and in this assignment we assume users will run no more than 64 threads.
 
-Among all the fields in *thread_control_block*, *ucontext_t ctx* is the field which enables you to switch the context from one thread to another thread. Read the [APIs](#apis) section for more details.
+Among all the fields in *thread_control_block*, *ucontext_t ctx* is the field which enables you to switch the context from one thread to another thread. Read the [APIs](#apis) section of this README for more details.
 
 ### data structures to track active thread IDs
 
