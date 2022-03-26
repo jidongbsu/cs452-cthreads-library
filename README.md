@@ -178,7 +178,7 @@ More specifically, the array *tids[]* stores tids. For the *ready_queue*, the ab
 
 Note that we can not take advantage of multiple processors, thus at any given moment, only one of our threads will be running, all the other active threads will be in a ready state, i.e., their IDs will be stored in this *ready_queue*. Or, in the semaphore case, their IDs may be stored in a semaphore's waiting queue.
 
-The above approach to initialize a struct is known as using **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore.
+The above approach to initialize a struct is known as using a **designated initializer**. You are recommended to use this same approach to initialize the queue of your semaphore.
 
 ### data structures for your locks
 
