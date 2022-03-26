@@ -8,8 +8,8 @@ In this assignment, we will write a user-level thread library called cadillac-th
 - Gaining a deep understanding of user-level thread libraries.
 - Understanding how to implement a round robin scheduler.
 - Practicing on managing queue data structures.
-- Learning how to implement a lock.
-- Learning how to implement a semaphore.
+- Learning how to implement locks.
+- Learning how to implement semaphores.
 
 ## Book References
 
@@ -32,7 +32,7 @@ This chapter has more explanation about the round robin scheduling policy, as we
 
 ### user-level thread library vs kernel-level thread library
 
-In previous assignments we used the pthreads library, which allows us to run multiple threads concurrently. The pthreads library are supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a separate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple threads of the same process.
+In previous assignments we used the pthreads library, which allows us to run multiple threads concurrently. The pthreads library is supported by the Linux kernel, and each pthread is mapped into one kernel thread, and the kernel manages to schedule these threads as if each thread is a separate process. This suggests such threads are visible to the kernel, and that's why when you run *ps -eLf*, you can see multiple threads of the same process.
 
 ```console
 (base) [jidongxiao@onyx ~]$ ps -eLf | grep test-mergesort
@@ -261,7 +261,7 @@ Also note that *cthread_dequeue*() has the following lines:
     queue->front = (queue->front + 1) % MAX_NUM_THREADS;
 ```
 
-which means it returns the tid at the front the queue, and then sets the corresponding element in the array to -1, which marks that this element is no longer storing a valid tid.
+which means it returns the tid at the front of the queue, and then sets the corresponding element in the array to -1, which marks that this element is no longer storing a valid tid.
 
 ```c
 static int isEmpty(struct Queue* queue);
@@ -292,7 +292,7 @@ int swapcontext(ucontext_t *oucp, const ucontext_t *ucp);
 **getcontext**() saves the current context in the structure pointed to by *ucp*. **setcontext**() restores to the previously saved context - the one pointed to by *ucp*. **makecontext**() modifies a context (pointed to by *ucp*), so that when this context is restored, *func*() will be called. **swapcontext**() saves the current context in the structure pointed to by *oucp*, and then activates the context pointed to by *ucp*.
 
 - in *cthread_init*(), you may want to use **getcontext**() to save the context of the main thread into the address pointed to by *ucp*.
-- in *cthread_create*(), you may want to use **getcontext**() to save the context of the newly created thread into the address pointed to by *ucp*, and use **makecontext**() to setup the start routine of this newly created thread.
+- in *cthread_create*(), you may want to use **getcontext**() to save the context of the newly created thread into the address pointed to by *ucp*, and use **makecontext**() to set up the start routine of this newly created thread.
 - in *cthread_join*(), you may want to use **swapcontext**() to save the context of the parent thread, and switch to the context of some other thread - not necessarily the child thread.
 - in *cthread_schedule*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
 - in *cthread_mutex_lock*(), you may want to use **swapcontext**() to save the context of the current thread, and switch to the context of another thread.
@@ -320,9 +320,9 @@ int cthread_create(cthread_t *thread, void *(*start_routine) (void *), void *arg
 }
 ```
 
-In the above, do no change the third argument of **makecontext**(), which is "1", which says this *start_routine*() has only 1 argument, which is *arg*.
+In the above, do not change the third argument of **makecontext**(), which is "1", which says this *start_routine*() has only 1 argument, which is *arg*.
 
-You do not need to call **makecontext**() in the main thread, and you do not need to setup any stack information for the main thread - it has its own stack by default. However, you still need to initialize its tcb, and call **getcontext**(), and you can do it like this: 
+You do not need to call **makecontext**() in the main thread, and you do not need to set up any stack information for the main thread - it has its own stack by default. However, you still need to initialize its tcb, and call **getcontext**(), and you can do it like this: 
 
 ```c
 static int cthread_init() {
@@ -378,7 +378,7 @@ Once *setitimer*() succeeds, a timer interrupt will trigger every 50 millisecond
 
 ### signal handling APIs
 
-To setup the signal handler, the following APIs are useful.
+To set up the signal handler, the following APIs are useful.
 
 ```c
 int sigemptyset(sigset_t *set);
@@ -439,7 +439,7 @@ Think about in which function you want to call this.
 
 ## Expected Results
 
-- When running cthreads-test1, you are expected to get:
+- When running *cthreads-test1*, you are expected to get:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test1
@@ -449,7 +449,7 @@ B
 main: end
 ```
 
-- When running cthreads-test2, you are expected to get the exactly same result as following:
+- When running *cthreads-test2*, you are expected to get the exactly same result as following:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test2
@@ -458,7 +458,7 @@ sum is 600
 
 Note that *cthread-test2* uses multiple threads to compute the sum of an array, and your testing result must be 600.
 
-- When running cthreads-test3, you are expected to get:
+- When running *cthreads-test3*, you are expected to get:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test3 4 100
@@ -471,7 +471,7 @@ final balance = 177966376.000000
 
 In the above, when run "cthreads-test3 4 100" you must get 400 as the result, when run "./cthreads-test3 4 100000000", your result must be lower than 400000000, but does not have to be the same number as the one showed above.
 
-- When running cthreads-test4, you are expected to get the exactly same result as following:
+- When running *cthreads-test4*, you are expected to get the exactly same result as following:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test4 4 100
@@ -482,7 +482,7 @@ initial balance = 0.000000
 final balance = 400000000.000000
 ```
 
-- When running cthreads-test5, you are expected to get a result similar to this:
+- When running *cthreads-test5*, you are expected to get a result similar to this:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test5
@@ -523,7 +523,7 @@ main: exiting
 
 In the above, the order of which thread exits first, which thread exits next, does not matter. But all 32 threads need to exit before the main thread exits.
 
-- When running cthreads-test6, you are expected to get the exactly same result as following:
+- When running *cthreads-test6*, you are expected to get the exactly same result as following:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test6
@@ -531,7 +531,7 @@ main: output "foobar" 10 times in a row:
 foobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobarfoobar
 main: exiting
 ```
-- When running cthreads-test7, you are expected to get the exactly same result as following:
+- When running *cthreads-test7*, you are expected to get the exactly same result as following:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test7
@@ -541,7 +541,7 @@ main: exiting
 ```
 As you can see, *cthreads-test6* and *cthreads-test7* produce the same result. They are just two different solutions to [Leetcode problem No.1115 - Print FooBar Alternately](https://leetcode.com/problems/print-foobar-alternately/). *cthreads-test6* uses locks. *cthreads-test7* uses semaphores.
 
-- When running cthreads-test8, you are expected to get results like this:
+- When running *cthreads-test8*, you are expected to get results like this:
 
 ```console
 (base) [jidongxiao@onyx cthreads]$ ./cthreads-test8
