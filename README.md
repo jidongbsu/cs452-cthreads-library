@@ -388,23 +388,23 @@ int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
 To facilitate you use these APIs, a global variable is defined:
 
 ```c
-struct sigaction scheduler;
+struct sigaction sig_action;
 ```
 
 You can initialize this variable like this:
 
 ```c
-scheduler.sa_handler = cthread_schedule;
-scheduler.sa_flags = SA_RESTART;
+sig_action.sa_handler = cthread_schedule;
+sig_action.sa_flags = SA_RESTART;
 /* the following two lines say, when the sa_handler function is in execution, all SIGPROF signals are blocked. Doing so avoids the complicated situation in which cthread_schedule() gets called in a nested way. */
-sigemptyset(&scheduler.sa_mask);
-sigaddset(&scheduler.sa_mask, SIGPROF);
+sigemptyset(&sig_action.sa_mask);
+sigaddset(&sig_action.sa_mask, SIGPROF);
 ```
 
 Once it's initialized, you can install the signal handler like this:
 
 ```c
-    if ((sigaction(SIGPROF, &scheduler, NULL)) != 0) {
+    if ((sigaction(SIGPROF, &sig_action, NULL)) != 0) {
         printf("oh no, installing a signal handler can fail?\n");
         return errno;
     }

@@ -33,8 +33,8 @@ static cthread_t current_tid;
  */
 struct itimerval time_quantum;
 
-/* sigaction for scheduler */
-static struct sigaction scheduler;
+/* signal action handler  */
+static struct sigaction sig_action;
 
 /* when this flag is one, tells the schedule not to schedule me out */
 static int no_schedule = 0;
