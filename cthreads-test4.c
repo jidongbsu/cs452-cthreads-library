@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 {
 	int i;
 
-	if (argc < 2) {
+	if (argc < 3) {
 		fprintf(stderr, "Usage: %s <numThreads> <iterations>\n", argv[0]);
 		exit(1);
 	}
