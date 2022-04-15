@@ -4,6 +4,7 @@
 
 #define N 32
 
+/* we have forks 0 to forks N-1. */
 cthread_mutex_t forks[N];
 
 /* this function calculates the lucas series, the lucas series
@@ -20,7 +21,12 @@ int lucas(int n){
 
 /* the two helper functions from the book chapter. */
 
-int left(int p)  { return p; }
+/* we need %N here, even for the left, because if we don't use %N, then, p, in our situation, 
+ * may reach N, which makes us access forks[N], which triggers a seg fault. 
+ * what we want is: philosopher 1, has its left fork 1, right fork 2,
+ * philosopher 2, has its left fork 2, right fork 3,
+ * philosopher 32, has its left fork 0, right fork 1. */
+int left(int p)  { return p % N; }
 int right(int p) { return (p + 1) % N; }
 
 /* get and put forks function from the bokk chapter */
@@ -40,6 +46,7 @@ void put_forks(int p) {
 	cthread_mutex_unlock(&forks[right(p)]);
 }
 
+/* we have philosopher 1 to philosopher N. */
 void* philosopher(void *arg) {
     long p;
 
