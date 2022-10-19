@@ -578,5 +578,5 @@ Grade: /100
   - You won't get these points if you didn't implement any of the above functional requirements.
 
 - [10 pts] Documentation:
-  - README.md file: replace this current README.md with a new one using the template. Do not check in this current README.
+  - README.md file (rename this current README file to README.orig and rename the README.template to README.md.)
   - You are required to fill in every section of the README template, missing 1 section will result in a 2-point deduction.
