@@ -553,7 +553,7 @@ In theory, your result might look different than the above result. Refer to [Lee
 
 ## Submission
 
-Due: 23:59pm, April 14th, 2022. Late submission will not be accepted/graded.
+Due: 23:59pm, November 3rd, 2022. Late submission will not be accepted/graded.
 
 ## Project Layout
 
